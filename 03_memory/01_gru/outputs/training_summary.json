@@ -1,0 +1,10 @@
+{
+  "epochs": 40,
+  "parameter_count": 343336,
+  "initial_train_total": 0.8035079762339592,
+  "final_train_total": 0.25207005627453327,
+  "final_val_total": 0.27830423414707184,
+  "final_val_reconstruction": 0.0037578962510451674,
+  "final_val_dynamics": 0.13667497038841248,
+  "final_val_position_cross_entropy": 0.005982003407552838
+}

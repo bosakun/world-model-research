@@ -1,0 +1,18 @@
+[project]
+name = "world-model-research"
+version = "0.1.0"
+description = "Paper-driven, reproducible world-model experiments"
+requires-python = ">=3.11,<3.14"
+dependencies = [
+  "matplotlib>=3.9,<4",
+  "numpy>=2.0,<3",
+  "torch>=2.4,<3",
+]
+
+[dependency-groups]
+dev = ["pytest>=8,<10"]
+
+[tool.pytest.ini_options]
+testpaths = ["03_memory/01_gru/tests"]
+addopts = "-ra"
+

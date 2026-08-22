@@ -1,0 +1,42 @@
+{
+  "evaluation_sequences": 64,
+  "one_step_latent_mse": 0.14136537909507751,
+  "one_step_pixel_mse": 0.005980079527944326,
+  "one_step_agent_position_accuracy": 0.8359375,
+  "rollout_mean_pixel_mse": 0.008376324782148004,
+  "rollout_pixel_mse_by_horizon": [
+    0.006331759504973888,
+    0.006556179374456406,
+    0.007767097093164921,
+    0.00826538447290659,
+    0.008876526728272438,
+    0.009282384067773819,
+    0.010043610818684101,
+    0.009887656196951866
+  ],
+  "rollout_agent_position_accuracy": 0.55859375,
+  "rollout_agent_position_accuracy_by_horizon": [
+    0.75,
+    0.765625,
+    0.640625,
+    0.546875,
+    0.515625,
+    0.5,
+    0.375,
+    0.375
+  ],
+  "hidden_shape": [
+    64,
+    8,
+    64
+  ],
+  "rollout_hidden_shape": [
+    64,
+    8,
+    64
+  ],
+  "gru_dynamics_parameter_count": 21712,
+  "simple_dynamics_parameter_count": 6544,
+  "mean_rollout_seconds_per_sequence": 6.979368437782796e-06,
+  "baseline_performance": "not measured; baseline is retained for a controlled later comparison"
+}
