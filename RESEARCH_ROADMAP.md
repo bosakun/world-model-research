@@ -46,8 +46,8 @@ Adding a GRU hidden state creates a valid mechanism for retaining trajectory his
 
 ## 04 Uncertainty
 
-- **Implementing** — Probabilistic transition model (aleatoric uncertainty)
-- **Not Started** — Ensemble epistemic uncertainty and calibration
+- **Completed** — `01_probabilistic_dynamics`: heteroscedastic diagonal-Gaussian transition, NLL, coverage, and sampled rollout
+- **Implementing** — `02_ensemble`: bootstrap ensemble, epistemic/aleatoric decomposition, and OOD disagreement
 - **Not Started** — Uncertainty-aware rollout/planning (PETS lineage)
 
 ## 05 Long Horizon

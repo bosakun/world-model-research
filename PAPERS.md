@@ -43,7 +43,8 @@ The year below follows the first public paper/proceedings record. Metadata and U
 
 | Status | Paper | Authors | Year | Primary source | Roadmap relevance |
 |---|---|---|---:|---|---|
-| Not Read | Deep Reinforcement Learning in a Handful of Trials using Probabilistic Dynamics Models (PETS) | Kurtland Chua, Roberto Calandra, Rowan McAllister, Sergey Levine | 2018 | https://arxiv.org/abs/1805.12114 | Probabilistic ensembles and trajectory sampling |
+| Reading | Deep Reinforcement Learning in a Handful of Trials using Probabilistic Dynamics Models (PETS) | Kurtland Chua, Roberto Calandra, Rowan McAllister, Sergey Levine | 2018 | https://arxiv.org/abs/1805.12114 | Probabilistic head/bounded variance/sampling started in `04_uncertainty/01_probabilistic_dynamics`; ensemble and PETS propagation next |
+| Implemented | What Uncertainties Do We Need in Bayesian Deep Learning for Computer Vision? | Alex Kendall, Yarin Gal | 2017 | https://arxiv.org/abs/1703.04977 | Aleatoric/epistemic distinction and heteroscedastic likelihood experiment in `04_uncertainty/01_probabilistic_dynamics` |
 
 ## Planning
 

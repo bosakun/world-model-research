@@ -1,0 +1,21 @@
+{
+  "dataset_version": "heteroscedastic-point-v1",
+  "evaluation_transitions": 256,
+  "next_state_rmse": 0.05685743689537048,
+  "gaussian_nll": -3.593069553375244,
+  "coverage_within_1_std": 0.6953125,
+  "coverage_within_2_std": 0.953125,
+  "predicted_true_std_correlation": 0.9376348713134565,
+  "mean_predicted_std": [
+    0.053192757070064545,
+    0.04526836425065994
+  ],
+  "mean_true_std": [
+    0.05391598120331764,
+    0.043789058923721313
+  ],
+  "rollout_horizon": 12,
+  "rollout_samples": 64,
+  "parameter_count": 4872,
+  "evaluation_entry_point": "python 04_uncertainty/01_probabilistic_dynamics/evaluate.py"
+}

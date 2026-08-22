@@ -1,0 +1,13 @@
+{
+  "dataset_version": "heteroscedastic-point-v1",
+  "seed": 37,
+  "epochs": 80,
+  "training_steps": 1280,
+  "optimizer": "Adam",
+  "learning_rate": 0.001,
+  "parameter_count": 4872,
+  "checkpoint_format_version": 1,
+  "initial_train_nll": 1.2997462749481201,
+  "final_train_nll": -3.654355213046074,
+  "final_val_nll": -3.7323700189590454
+}
