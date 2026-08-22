@@ -1,0 +1,15 @@
+{
+  "dataset_version": "moving-voxel-sphere-v1",
+  "seed": 191,
+  "voxel_iou_by_horizon": [
+    0.8080660700798035,
+    0.7963311672210693,
+    0.8017282485961914,
+    0.776630699634552,
+    0.7623026967048645,
+    0.7456778883934021
+  ],
+  "final_voxel_iou": 0.7456778883934021,
+  "threshold": 0.5,
+  "evaluation_entry_point": "python 09_spatial_representation/04_occupancy_3d/evaluate.py"
+}

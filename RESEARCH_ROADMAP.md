@@ -76,11 +76,11 @@ Adding a GRU hidden state creates a valid mechanism for retaining trajectory his
 - **Completed** — `01_cswm`: known-binding object slots, relational graph transition, contrastive energy, and post-hoc position probe
 - **Completed (failed discovery result)** — `02_slot_attention`: iterative competitive binding and broadcast reconstruction work mechanically, but object mask IoU remained 0.271; retained as a documented collapse case
 - **Completed** — `03_slotformer`: frame-causal temporal Transformer over reliable ordered slots with eight-frame autoregressive diagnostics
-- **Implementing** — `04_occupancy_3d`: compact voxel occupancy representation and future occupancy prediction
+- **Completed** — `04_occupancy_3d`: action-conditioned 8³ voxel latent rollout with BCE, Dice, consistency, geometric-center losses, and six-horizon IoU
 
 ## 10 Video World Model
 
-- **Not Started** — Video tokenization and temporal generation
+- **Implementing** — `01_video_tokenizer`: discrete video tokens and reconstruction
 - **Not Started** — Genie / UniSim mechanism studies
 
 ## 11 Multimodal
