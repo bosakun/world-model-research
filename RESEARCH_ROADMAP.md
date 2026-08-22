@@ -73,8 +73,9 @@ Adding a GRU hidden state creates a valid mechanism for retaining trajectory his
 
 ## 09 Spatial Representation
 
-- **Implementing** — `01_cswm`: object-factorized representation, relational transition, and contrastive objective
-- **Not Started** — Slot Attention and SlotFormer
+- **Completed** — `01_cswm`: known-binding object slots, relational graph transition, contrastive energy, and post-hoc position probe
+- **Implementing** — `02_slot_attention`: iterative competitive binding without fixed object channel assignment
+- **Not Started** — `03_slotformer`: temporal Transformer over slots
 - **Not Started** — 3D occupancy representation
 
 ## 10 Video World Model

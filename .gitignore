@@ -13,3 +13,4 @@ __pycache__/
 06_reward_value/01_prediction_heads/outputs/checkpoint.pt
 07_planning/04_latent_planning/outputs/checkpoint.pt
 08_imagination_rl/01_actor_critic/outputs/checkpoint.pt
+09_spatial_representation/01_cswm/outputs/checkpoint.pt

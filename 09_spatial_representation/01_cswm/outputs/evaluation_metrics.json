@@ -1,0 +1,8 @@
+{
+  "dataset_version": "two-object-relational-v1",
+  "seed": 151,
+  "current_position_probe_rmse": 0.005870726890861988,
+  "predicted_next_position_probe_rmse": 0.013061895966529846,
+  "slot_assignment": "fixed by color channel",
+  "evaluation_entry_point": "python 09_spatial_representation/01_cswm/evaluate.py"
+}
