@@ -80,8 +80,9 @@ Adding a GRU hidden state creates a valid mechanism for retaining trajectory his
 
 ## 10 Video World Model
 
-- **Implementing** — `01_video_tokenizer`: discrete video tokens and reconstruction
-- **Not Started** — Genie / UniSim mechanism studies
+- **Completed** — `01_vq_video_tokenizer`: VQ frame tokens, straight-through training, reconstruction, and codebook-collapse diagnostics
+- **Implementing** — `02_latent_action_dynamics`: infer discrete latent actions from frame pairs and predict future video tokens (Genie mechanism study)
+- **Not Started** — `03_heterogeneous_simulator`: heterogeneous conditional generation (UniSim mechanism study)
 
 ## 11 Multimodal
 

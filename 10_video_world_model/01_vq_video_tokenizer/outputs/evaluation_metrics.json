@@ -1,0 +1,9 @@
+{
+  "dataset_version": "moving-square-video-v1",
+  "seed": 211,
+  "reconstruction_mse": 0.0035650869831442833,
+  "codebook_perplexity": 2.891238212585449,
+  "active_codes": 5,
+  "tokens_per_frame": 16,
+  "evaluation_entry_point": "python 10_video_world_model/01_vq_video_tokenizer/evaluate.py"
+}

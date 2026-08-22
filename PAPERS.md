@@ -78,7 +78,8 @@ The year below follows the first public paper/proceedings record. Metadata and U
 
 | Status | Paper | Authors | Year | Primary source | Roadmap relevance |
 |---|---|---|---:|---|---|
-| Not Read | Genie: Generative Interactive Environments | Jake Bruce et al. | 2024 | https://arxiv.org/abs/2402.15391 | Video tokenizer, latent action model, autoregressive interactive dynamics |
+| Implemented | Neural Discrete Representation Learning (VQ-VAE) | Aaron van den Oord, Oriol Vinyals, Koray Kavukcuoglu | 2017 | https://arxiv.org/abs/1711.00937 | Discrete visual tokenizer in `10_video_world_model/01_vq_video_tokenizer` |
+| Reading | Genie: Generative Interactive Environments | Jake Bruce et al. | 2024 | https://arxiv.org/abs/2402.15391 | VQ tokenizer mechanism implemented; latent-action dynamics in progress; not a full Genie reproduction |
 | Not Read | Learning Interactive Real-World Simulators (UniSim) | Sherry Yang, Yilun Du, Kamyar Ghasemipour, Jonathan Tompson, Leslie Kaelbling, Dale Schuurmans, Pieter Abbeel | 2023 | https://arxiv.org/abs/2310.06114 | Generative simulator trained across heterogeneous data |
 
 ## Physical World Models
