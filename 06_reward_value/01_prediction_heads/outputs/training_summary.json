@@ -1,0 +1,16 @@
+{
+  "dataset_version": "goal-navigation-v1",
+  "seed": 59,
+  "discount": 0.95,
+  "epochs": 80,
+  "training_steps": 640,
+  "optimizer": "Adam",
+  "learning_rate": 0.001,
+  "parameter_count": 9091,
+  "checkpoint_format_version": 1,
+  "final_train_total": 0.2517766064276171,
+  "final_val_total": 0.24810220301151276,
+  "final_val_reward": 0.07394842803478241,
+  "final_val_value": 0.021232474595308304,
+  "final_val_continuation": 0.15292130410671234
+}

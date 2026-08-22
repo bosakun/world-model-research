@@ -10,3 +10,4 @@ __pycache__/
 04_uncertainty/02_ensemble/outputs/checkpoint.pt
 05_long_horizon/01_latent_overshooting/outputs/checkpoint.pt
 05_long_horizon/02_temporal_abstraction/outputs/checkpoint.pt
+06_reward_value/01_prediction_heads/outputs/checkpoint.pt

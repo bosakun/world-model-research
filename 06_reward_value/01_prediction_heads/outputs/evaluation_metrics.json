@@ -1,0 +1,15 @@
+{
+  "dataset_version": "goal-navigation-v1",
+  "evaluation_sequences": 128,
+  "valid_transitions": 568,
+  "terminal_transitions": 128,
+  "reward_rmse": 0.25150206685066223,
+  "value_rmse": 0.13537393510341644,
+  "continuation_accuracy": 0.9735915660858154,
+  "continuation_brier": 0.03194151073694229,
+  "mean_continuation_probability_on_terminal": 0.18201114237308502,
+  "mean_continuation_probability_on_nonterminal": 0.9501581192016602,
+  "discount": 0.95,
+  "parameter_count": 9091,
+  "evaluation_entry_point": "python 06_reward_value/01_prediction_heads/evaluate.py"
+}

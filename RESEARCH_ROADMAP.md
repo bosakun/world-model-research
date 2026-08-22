@@ -57,13 +57,12 @@ Adding a GRU hidden state creates a valid mechanism for retaining trajectory his
 
 ## 06 Reward and Value
 
-- **Implementing** — Reward model
-- **Not Started** — Value model and long-horizon return targets
-- **Not Started** — Continuation / termination prediction
+- **Completed** — `01_prediction_heads`: immediate reward, Monte Carlo value, continuation probability, terminal-aware masking and calibration
 
 ## 07 Planning
 
-- **Not Started** — Random shooting / CEM in latent space
+- **Implementing** — Random shooting in learned state space
+- **Not Started** — CEM and receding-horizon MPC
 - **Not Started** — Search with learned reward/value
 - **Not Started** — TD-MPC2 and MuZero mechanism studies
 
