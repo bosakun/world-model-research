@@ -1,0 +1,48 @@
+{
+  "dataset_version": "partial-observation-v1",
+  "evaluation_sequences": 32,
+  "posterior_reconstruction_mse": 0.0007455364684574306,
+  "posterior_state_head_goal_class_accuracy": 1.0,
+  "one_step_prior_pixel_mse": 0.0006179036572575569,
+  "one_step_prior_state_head_goal_class_accuracy": 1.0,
+  "prior_rollout_mean_pixel_mse": 0.000628432911374451,
+  "prior_rollout_pixel_mse_by_horizon": [
+    0.0004251272475812584,
+    3.0957089620642364e-05,
+    0.00038141896948218346,
+    0.000850380165502429,
+    0.0010345748160034418,
+    0.0010481391800567508
+  ],
+  "prior_rollout_mean_state_head_goal_class_accuracy": 1.0,
+  "prior_rollout_state_head_goal_class_accuracy_by_horizon": [
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0
+  ],
+  "deterministic_state_shape": [
+    32,
+    7,
+    64
+  ],
+  "stochastic_state_shape": [
+    32,
+    7,
+    16
+  ],
+  "prior_parameter_shape": [
+    32,
+    7,
+    16
+  ],
+  "posterior_parameter_shape": [
+    32,
+    7,
+    16
+  ],
+  "parameter_count": 428330,
+  "evaluation_entry_point": "python 03_memory/03_rssm/evaluate.py"
+}

@@ -24,9 +24,9 @@ Statuses: `Not Started`, `Reading`, `Implementing`, `Evaluating`, `Completed`, `
 
 - **Completed** — `01_gru`: deterministic recurrent latent dynamics on fully observable Grid World
 - **Completed** — `02_partial_observation`: paired local-view aliases establish equal observations with different hidden Goal states; model comparison deferred
-- **Not Started** — `03_rssm`: deterministic + stochastic recurrent state, prior/posterior, KL
+- **Completed** — `03_rssm`: continuous-Gaussian deterministic/stochastic recurrent state, prior/posterior, reparameterization, KL, reconstruction, and prior-only rollout (21 combined tests passed; one-seed smoke run, not a comparison)
 - **Not Started** — `04_transformer_memory`: attention-based temporal context
-- **Not Started** — `05_comparison`: first compare No Memory / Simple Dynamics vs GRU on `02_partial_observation` under matched conditions; later extend only after RSSM and Transformer experiments exist
+- **Deferred to Phase 90** — matched No Memory / GRU / RSSM / Transformer comparison and memory ablations
 
 ### 03/01 hypothesis
 
@@ -92,13 +92,15 @@ Adding a GRU hidden state creates a valid mechanism for retaining trajectory his
 - **Not Started** — Action-conditioned predictive representation
 - **Not Started** — Robot and autonomous-driving transfer (V-JEPA 2, DayDreamer, OccWorld)
 
-## 13 Security
+## 90 Evaluation
 
-- **Not Started** — Threat model for observations, latent state, dynamics, planner, and action execution
-- **Not Started** — Uncertainty-aware gating, adversarial robustness, and runtime evaluation
+- **Not Started** — Unified No Memory / GRU / RSSM / Transformer Memory evaluation
+- **Not Started** — One/5/10-step and long-horizon prediction under matched data and seeds
+- **Not Started** — Uncertainty calibration, planning success, parameter/latency/memory accounting
+- **Not Started** — Ablations, multiple seeds, and training stability
 
 ## 99 Integrated World Model
 
 - **Not Started** — Select components from controlled comparisons
 - **Not Started** — Integrate perception, memory, dynamics, uncertainty, imagination, reward/value, and planning
-- **Not Started** — End-to-end ablations and safety evaluation
+- **Not Started** — End-to-end smoke test and evidence-based component decision record

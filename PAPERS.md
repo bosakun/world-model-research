@@ -17,7 +17,7 @@ The year below follows the first public paper/proceedings record. Metadata and U
 
 | Status | Paper | Authors | Year | Primary source | Roadmap relevance |
 |---|---|---|---:|---|---|
-| Not Read | Auto-Encoding Variational Bayes | Diederik P. Kingma, Max Welling | 2013 | https://arxiv.org/abs/1312.6114 | Variational latent variables, reparameterization, KL |
+| Implemented | Auto-Encoding Variational Bayes | Diederik P. Kingma, Max Welling | 2013 | https://arxiv.org/abs/1312.6114 | Reparameterization and analytic diagonal-Gaussian KL in `03_memory/03_rssm` |
 
 ## Partial Observability
 
@@ -29,7 +29,7 @@ The year below follows the first public paper/proceedings record. Metadata and U
 
 | Status | Paper | Authors | Year | Primary source | Roadmap relevance |
 |---|---|---|---:|---|---|
-| Overview Read | Learning Latent Dynamics for Planning from Pixels (PlaNet) | Danijar Hafner, Timothy Lillicrap, Ian Fischer, Ruben Villegas, David Ha, Honglak Lee, James Davidson | 2018 | https://arxiv.org/abs/1811.04551 | RSSM, deterministic/stochastic state, prior/posterior, latent overshooting |
+| Implemented | Learning Latent Dynamics for Planning from Pixels (PlaNet) | Danijar Hafner, Timothy Lillicrap, Ian Fischer, Ruben Villegas, David Ha, Honglak Lee, James Davidson | 2018 | https://arxiv.org/abs/1811.04551 | Simplified continuous RSSM core in `03_memory/03_rssm`; reward, planning, and overshooting remain unimplemented |
 
 ## Imagination
 
@@ -80,10 +80,3 @@ The year below follows the first public paper/proceedings record. Metadata and U
 | Not Read | V-JEPA 2: Self-Supervised Video Models Enable Understanding, Prediction and Planning | Mido Assran et al. | 2025 | https://arxiv.org/abs/2506.09985 | Latent video prediction and action-conditioned robot planning |
 | Not Read | DayDreamer: World Models for Physical Robot Learning | Philipp Wu, Alejandro Escontrela, Danijar Hafner, Ken Goldberg, Pieter Abbeel | 2022 | https://arxiv.org/abs/2206.14176 | Online Dreamer learning on physical robots |
 | Not Read | OccWorld: Learning a 3D Occupancy World Model for Autonomous Driving | Wenzhao Zheng, Weiliang Chen, Yuanhui Huang, Borui Zhang, Yueqi Duan, Jiwen Lu | 2023 | https://arxiv.org/abs/2311.16038 | 3D occupancy tokens, future scene and ego trajectory generation |
-
-## Safety
-
-| Status | Paper | Authors | Year | Primary source | Roadmap relevance |
-|---|---|---|---:|---|---|
-| Not Read | The Safety Challenge of World Models for Embodied AI Agents: A Review | Lorenzo Baraldi et al. | 2025 | https://arxiv.org/abs/2510.05865 | Safety pathologies in scene/control generation |
-| Not Read | Security of World-Model-Based Embodied AI: A Lifecycle of Threats, Defenses, and Evaluation | Fazhong Liu, Zhuoyan Chen, Haozhen Tan, Yan Meng, Guoxing Chen, Haojin Zhu | 2026 | https://arxiv.org/abs/2607.28226 | Lifecycle threat model, defenses, and evaluation; very recent, re-check revisions before use |

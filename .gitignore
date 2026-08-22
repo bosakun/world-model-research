@@ -4,3 +4,4 @@ __pycache__/
 *.py[cod]
 .pytest_cache/
 03_memory/01_gru/outputs/checkpoint.pt
+03_memory/03_rssm/outputs/checkpoint.pt
