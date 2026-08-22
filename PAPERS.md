@@ -50,8 +50,8 @@ The year below follows the first public paper/proceedings record. Metadata and U
 
 | Status | Paper | Authors | Year | Primary source | Roadmap relevance |
 |---|---|---|---:|---|---|
-| Reading | Mastering Atari, Go, Chess and Shogi by Planning with a Learned Model (MuZero) | Julian Schrittwieser et al. | 2020 | https://doi.org/10.1038/s41586-020-03051-4 and https://arxiv.org/abs/1911.08265 | Planning-relevant reward/value interface studied in `06_reward_value`; representation/dynamics/policy/MCTS remain unimplemented |
-| Not Read | TD-MPC2: Scalable, Robust World Models for Continuous Control | Nicklas Hansen, Hao Su, Xiaolong Wang | 2023 | https://arxiv.org/abs/2310.16828 | Decoder-free latent model, local trajectory optimization, scaling |
+| Reading | Mastering Atari, Go, Chess and Shogi by Planning with a Learned Model (MuZero) | Julian Schrittwieser et al. | 2020 | https://doi.org/10.1038/s41586-020-03051-4 and https://arxiv.org/abs/1911.08265 | Decoder-free representation/dynamics/reward/value lineage studied in `07_planning/04_latent_planning`; MCTS, policy head, and full training remain unimplemented |
+| Implemented | TD-MPC2: Scalable, Robust World Models for Continuous Control | Nicklas Hansen, Hao Su, Xiaolong Wang | 2023 | https://arxiv.org/abs/2310.16828 | Simplified decoder-free task-oriented latent consistency and continuous CEM planning in `07_planning/04_latent_planning`; not a full reproduction |
 
 ## Temporal Abstraction
 

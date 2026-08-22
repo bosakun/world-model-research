@@ -64,11 +64,11 @@ Adding a GRU hidden state creates a valid mechanism for retaining trajectory his
 - **Completed** — `01_random_shooting`: uniform continuous action-sequence search with reward + terminal-value scoring
 - **Completed** — `02_cem`: iterative elite Gaussian refitting
 - **Completed** — `03_mpc`: execute-first-action receding-horizon CEM loop
-- **Implementing** — `04_latent_planning`: decoder-free task-oriented latent dynamics/reward/value planning (TD-MPC2/MuZero lineage)
+- **Completed** — `04_latent_planning`: decoder-free task-oriented latent dynamics/reward/value planning with learned-model CEM (four tests; one-seed smoke run)
 
 ## 08 Imagination RL
 
-- **Not Started** — Actor/value learning from imagined trajectories
+- **Implementing** — `01_actor_critic`: actor/value learning from imagined trajectories
 - **Not Started** — Dreamer-family comparisons
 
 ## 09 Spatial Representation

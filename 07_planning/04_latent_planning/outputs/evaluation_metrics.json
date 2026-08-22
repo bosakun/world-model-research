@@ -1,0 +1,15 @@
+{
+  "dataset_version": "point-world-latent-planning-v1",
+  "seed": 101,
+  "planning_horizon": 10,
+  "candidates": 512,
+  "elites": 64,
+  "cem_iterations": 6,
+  "learned_latent_score": -11.470324516296387,
+  "exact_world_score": -12.497681617736816,
+  "initial_distance": 2.2671568393707275,
+  "final_distance": 0.9858037829399109,
+  "distance_reduction_fraction": 0.5651805996894836,
+  "uses_observation_decoder": false,
+  "evaluation_entry_point": "python 07_planning/04_latent_planning/evaluate.py"
+}
