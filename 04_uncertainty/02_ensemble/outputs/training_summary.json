@@ -1,0 +1,15 @@
+{
+  "dataset_version": "heteroscedastic-point-v1",
+  "seed": 41,
+  "bootstrap_seed": 42,
+  "ensemble_size": 5,
+  "epochs": 60,
+  "training_steps_per_member": 960,
+  "optimizer": "independent Adam per member",
+  "learning_rate": 0.001,
+  "parameter_count": 24360,
+  "checkpoint_format_version": 1,
+  "initial_train_member_mean_nll": 1.306754319369793,
+  "final_train_member_mean_nll": -3.562815138697624,
+  "final_val_member_mean_nll": -3.689120626449585
+}

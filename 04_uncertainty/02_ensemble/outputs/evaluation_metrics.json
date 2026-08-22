@@ -1,0 +1,22 @@
+{
+  "dataset_version": "heteroscedastic-point-v1",
+  "ensemble_size": 5,
+  "evaluation_transitions": 256,
+  "moment_matched_gaussian_nll": -3.5822978019714355,
+  "next_state_rmse": 0.060513127595186234,
+  "coverage_within_1_total_std": 0.732421875,
+  "coverage_within_2_total_std": 0.966796875,
+  "aleatoric_predicted_true_std_correlation": 0.952626280118526,
+  "in_distribution_epistemic_std": 0.010660689324140549,
+  "out_of_distribution_epistemic_std": 0.016399553045630455,
+  "ood_to_id_epistemic_ratio": 1.5383201354995462,
+  "mean_in_distribution_aleatoric_std": 0.052202023565769196,
+  "rollout_horizon": 12,
+  "rollout_particles_per_method": 128,
+  "propagation_methods": [
+    "ts_infinity",
+    "ts1"
+  ],
+  "parameter_count": 24360,
+  "evaluation_entry_point": "python 04_uncertainty/02_ensemble/evaluate.py"
+}

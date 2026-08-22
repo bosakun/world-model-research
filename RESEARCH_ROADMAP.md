@@ -47,12 +47,12 @@ Adding a GRU hidden state creates a valid mechanism for retaining trajectory his
 ## 04 Uncertainty
 
 - **Completed** — `01_probabilistic_dynamics`: heteroscedastic diagonal-Gaussian transition, NLL, coverage, and sampled rollout
-- **Implementing** — `02_ensemble`: bootstrap ensemble, epistemic/aleatoric decomposition, and OOD disagreement
-- **Not Started** — Uncertainty-aware rollout/planning (PETS lineage)
+- **Completed** — `02_ensemble`: five-member bootstrap ensemble, epistemic/aleatoric decomposition, OOD disagreement, TS1 and TS-infinity particle rollout
+- **Deferred to Phase 07** — uncertainty-aware CEM/MPC planning; probabilistic rollout interface is ready
 
 ## 05 Long Horizon
 
-- **Not Started** — Overshooting / multi-step objectives
+- **Implementing** — Overshooting / multi-step objectives and compounding-error diagnostics
 - **Not Started** — Hierarchical temporal abstraction
 
 ## 06 Reward and Value
