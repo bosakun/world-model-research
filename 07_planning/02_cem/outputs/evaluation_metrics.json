@@ -1,0 +1,23 @@
+{
+  "model_version": "exact-point-world-v1",
+  "horizon": 10,
+  "candidates": 512,
+  "elites": 64,
+  "iterations": 5,
+  "discount": 0.97,
+  "momentum": 0.1,
+  "seed": 71,
+  "initial_distance": 2.2671568393707275,
+  "final_predicted_distance": 0.6068660020828247,
+  "distance_reduction_fraction": 0.7323228716850281,
+  "selected_predicted_score": -11.865666389465332,
+  "final_mean_action_std": 0.27210259437561035,
+  "iteration_best_scores": [
+    -16.029264450073242,
+    -13.651368141174316,
+    -13.720937728881836,
+    -12.346899032592773,
+    -11.865666389465332
+  ],
+  "evaluation_entry_point": "python 07_planning/02_cem/evaluate.py"
+}

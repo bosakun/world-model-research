@@ -61,10 +61,10 @@ Adding a GRU hidden state creates a valid mechanism for retaining trajectory his
 
 ## 07 Planning
 
-- **Implementing** — Random shooting in learned state space
-- **Not Started** — CEM and receding-horizon MPC
-- **Not Started** — Search with learned reward/value
-- **Not Started** — TD-MPC2 and MuZero mechanism studies
+- **Completed** — `01_random_shooting`: uniform continuous action-sequence search with reward + terminal-value scoring
+- **Completed** — `02_cem`: iterative elite Gaussian refitting
+- **Completed** — `03_mpc`: execute-first-action receding-horizon CEM loop
+- **Implementing** — `04_latent_planning`: decoder-free task-oriented latent dynamics/reward/value planning (TD-MPC2/MuZero lineage)
 
 ## 08 Imagination RL
 

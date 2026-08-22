@@ -1,0 +1,13 @@
+{
+  "model_version": "exact-point-world-v1",
+  "horizon": 10,
+  "candidates": 4096,
+  "discount": 0.97,
+  "seed": 67,
+  "initial_distance": 2.2671568393707275,
+  "final_predicted_distance": 1.3088527917861938,
+  "distance_reduction_fraction": 0.4226897954940796,
+  "selected_predicted_score": -15.741778373718262,
+  "mean_candidate_score": -20.854949951171875,
+  "evaluation_entry_point": "python 07_planning/01_random_shooting/evaluate.py"
+}

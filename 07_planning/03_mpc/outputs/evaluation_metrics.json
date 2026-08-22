@@ -1,0 +1,17 @@
+{
+  "model_version": "exact-point-world-v1",
+  "planning_horizon": 8,
+  "candidates": 256,
+  "elites": 32,
+  "cem_iterations": 4,
+  "discount": 0.97,
+  "max_environment_steps": 20,
+  "seed": 73,
+  "success": true,
+  "executed_steps": 12,
+  "replanning_calls": 12,
+  "initial_distance": 2.2671568393707275,
+  "final_distance": 0.0006452700472436845,
+  "total_environment_reward": -11.336052894592285,
+  "evaluation_entry_point": "python 07_planning/03_mpc/evaluate.py"
+}
