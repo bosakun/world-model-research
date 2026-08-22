@@ -23,10 +23,10 @@ Statuses: `Not Started`, `Reading`, `Implementing`, `Evaluating`, `Completed`, `
 ## 03 Memory
 
 - **Completed** — `01_gru`: deterministic recurrent latent dynamics on fully observable Grid World
-- **Not Started** — `02_partial_observation`: test whether memory resolves perceptual aliasing
+- **Completed** — `02_partial_observation`: paired local-view aliases establish equal observations with different hidden Goal states; model comparison deferred
 - **Not Started** — `03_rssm`: deterministic + stochastic recurrent state, prior/posterior, KL
 - **Not Started** — `04_transformer_memory`: attention-based temporal context
-- **Not Started** — `05_comparison`: No Memory vs GRU vs RSSM vs Transformer under matched conditions
+- **Not Started** — `05_comparison`: first compare No Memory / Simple Dynamics vs GRU on `02_partial_observation` under matched conditions; later extend only after RSSM and Transformer experiments exist
 
 ### 03/01 hypothesis
 

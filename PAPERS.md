@@ -19,6 +19,12 @@ The year below follows the first public paper/proceedings record. Metadata and U
 |---|---|---|---:|---|---|
 | Not Read | Auto-Encoding Variational Bayes | Diederik P. Kingma, Max Welling | 2013 | https://arxiv.org/abs/1312.6114 | Variational latent variables, reparameterization, KL |
 
+## Partial Observability
+
+| Status | Paper | Authors | Year | Primary source | Roadmap relevance |
+|---|---|---:|---:|---|---|
+| Overview Read | Planning and Acting in Partially Observable Stochastic Domains | Leslie Pack Kaelbling, Michael L. Littman, Anthony R. Cassandra | 1998 | https://doi.org/10.1016/S0004-3702(98)00023-X | POMDP state/observation distinction and finite-memory-controller context; `03_memory/02_partial_observation` environment framing |
+
 ## Latent Dynamics / RSSM
 
 | Status | Paper | Authors | Year | Primary source | Roadmap relevance |
@@ -81,4 +87,3 @@ The year below follows the first public paper/proceedings record. Metadata and U
 |---|---|---|---:|---|---|
 | Not Read | The Safety Challenge of World Models for Embodied AI Agents: A Review | Lorenzo Baraldi et al. | 2025 | https://arxiv.org/abs/2510.05865 | Safety pathologies in scene/control generation |
 | Not Read | Security of World-Model-Based Embodied AI: A Lifecycle of Threats, Defenses, and Evaluation | Fazhong Liu, Zhuoyan Chen, Haozhen Tan, Yan Meng, Guoxing Chen, Haojin Zhu | 2026 | https://arxiv.org/abs/2607.28226 | Lifecycle threat model, defenses, and evaluation; very recent, re-check revisions before use |
-
