@@ -74,8 +74,8 @@ Adding a GRU hidden state creates a valid mechanism for retaining trajectory his
 ## 09 Spatial Representation
 
 - **Completed** — `01_cswm`: known-binding object slots, relational graph transition, contrastive energy, and post-hoc position probe
-- **Implementing** — `02_slot_attention`: iterative competitive binding without fixed object channel assignment
-- **Not Started** — `03_slotformer`: temporal Transformer over slots
+- **Completed (failed discovery result)** — `02_slot_attention`: iterative competitive binding and broadcast reconstruction work mechanically, but object mask IoU remained 0.271; retained as a documented collapse case
+- **Implementing** — `03_slotformer`: temporal Transformer over reliable ordered object slots, isolating dynamics from failed visual binding
 - **Not Started** — 3D occupancy representation
 
 ## 10 Video World Model

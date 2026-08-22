@@ -1,0 +1,8 @@
+{
+  "dataset_version": "colored-two-object-images-v2",
+  "seed": 163,
+  "reconstruction_mse": 0.01453031599521637,
+  "mean_best_permutation_iou": 0.2713397741317749,
+  "best_example_iou": 0.34365078806877136,
+  "evaluation_entry_point": "python 09_spatial_representation/02_slot_attention/evaluate.py"
+}

@@ -1,0 +1,20 @@
+{
+  "seed": 163,
+  "dataset_version": "colored-two-object-images-v2",
+  "image_size": 16,
+  "num_slots": 3,
+  "slot_dim": 32,
+  "iterations": 3,
+  "train_samples": 768,
+  "validation_samples": 192,
+  "batch_size": 64,
+  "epochs": 80,
+  "learning_rate": 0.0004,
+  "foreground_weight": 8.0,
+  "optimizer": "Adam",
+  "training_steps": 960,
+  "parameter_count": 46788,
+  "epoch": 80,
+  "train_reconstruction": 0.034934148813287415,
+  "validation_reconstruction": 0.03483803942799568
+}

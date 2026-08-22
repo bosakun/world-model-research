@@ -71,7 +71,7 @@ The year below follows the first public paper/proceedings record. Metadata and U
 | Status | Paper | Authors | Year | Primary source | Roadmap relevance |
 |---|---|---|---:|---|---|
 | Implemented | Contrastive Learning of Structured World Models | Thomas Kipf, Elise van der Pol, Max Welling | 2019 | https://arxiv.org/abs/1911.12247 | Simplified object slots, relational transition, and contrastive energy in `09_spatial_representation/01_cswm`; known visual binding is project-specific |
-| Not Read | Object-Centric Learning with Slot Attention | Francesco Locatello et al. | 2020 | https://arxiv.org/abs/2006.15055 | Competitive iterative object slots |
+| Implemented | Object-Centric Learning with Slot Attention | Francesco Locatello et al. | 2020 | https://arxiv.org/abs/2006.15055 | Simplified iterative competitive slots and broadcast reconstruction in `09_spatial_representation/02_slot_attention`; documented failed object-discovery smoke result |
 | Not Read | SlotFormer: Unsupervised Visual Dynamics Simulation with Object-Centric Models | Ziyi Wu, Nikita Dvornik, Klaus Greff, Thomas Kipf, Animesh Garg | 2022 | https://arxiv.org/abs/2210.05861 | Transformer dynamics over object-centric slots |
 
 ## Generative / Video World Models
