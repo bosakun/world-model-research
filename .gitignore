@@ -15,3 +15,4 @@ __pycache__/
 08_imagination_rl/01_actor_critic/outputs/checkpoint.pt
 09_spatial_representation/01_cswm/outputs/checkpoint.pt
 09_spatial_representation/02_slot_attention/outputs/checkpoint.pt
+09_spatial_representation/03_slotformer/outputs/checkpoint.pt

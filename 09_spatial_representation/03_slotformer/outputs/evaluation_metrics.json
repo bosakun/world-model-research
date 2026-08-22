@@ -1,0 +1,18 @@
+{
+  "dataset_version": "relational-slot-sequences-v1",
+  "seed": 179,
+  "context_frames": 4,
+  "rollout_frames": 8,
+  "rollout_rmse_by_horizon": [
+    0.03033454716205597,
+    0.06161026656627655,
+    0.09476950019598007,
+    0.1305781453847885,
+    0.1649465411901474,
+    0.19910211861133575,
+    0.23336990177631378,
+    0.2681759297847748
+  ],
+  "final_rollout_rmse": 0.2681759297847748,
+  "evaluation_entry_point": "python 09_spatial_representation/03_slotformer/evaluate.py"
+}
