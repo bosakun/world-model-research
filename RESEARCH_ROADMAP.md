@@ -53,12 +53,13 @@ Adding a GRU hidden state creates a valid mechanism for retaining trajectory his
 ## 05 Long Horizon
 
 - **Completed** — `01_latent_overshooting`: all-start distance-5 recursive objective and 30-step compounding-error diagnostics
-- **Implementing** — `02_temporal_abstraction`: fixed-duration action chunks and learned macro transition
+- **Completed** — `02_temporal_abstraction`: ordered five-action chunks and learned boundary-to-boundary macro transition
 
 ## 06 Reward and Value
 
-- **Not Started** — Reward model
+- **Implementing** — Reward model
 - **Not Started** — Value model and long-horizon return targets
+- **Not Started** — Continuation / termination prediction
 
 ## 07 Planning
 

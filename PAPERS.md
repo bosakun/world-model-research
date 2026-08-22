@@ -57,7 +57,7 @@ The year below follows the first public paper/proceedings record. Metadata and U
 
 | Status | Paper | Authors | Year | Primary source | Roadmap relevance |
 |---|---|---|---:|---|---|
-| Reading | Between MDPs and Semi-MDPs: A Framework for Temporal Abstraction in Reinforcement Learning | Richard S. Sutton, Doina Precup, Satinder Singh | 1999 | https://doi.org/10.1016/S0004-3702(99)00052-1 | Options/macro-action framing for `05_long_horizon/02_temporal_abstraction`; full option learning is not planned in this smoke phase |
+| Implemented | Between MDPs and Semi-MDPs: A Framework for Temporal Abstraction in Reinforcement Learning | Richard S. Sutton, Doina Precup, Satinder Singh | 1999 | https://doi.org/10.1016/S0004-3702(99)00052-1 | Simplified fixed action-chunk macro transition in `05_long_horizon/02_temporal_abstraction`; initiation/policy/termination and SMDP learning are not reproduced |
 
 ## Transformer World Models
 

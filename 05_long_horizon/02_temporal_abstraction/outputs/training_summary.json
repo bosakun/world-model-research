@@ -1,0 +1,15 @@
+{
+  "dataset_version": "controlled-oscillator-v1-macro5",
+  "seed": 53,
+  "epochs": 100,
+  "training_steps": 400,
+  "optimizer": "Adam",
+  "learning_rate": 0.001,
+  "chunk_size": 5,
+  "macro_steps_per_rollout": 6,
+  "parameter_count": 10178,
+  "checkpoint_format_version": 1,
+  "initial_train_macro_mse": 0.13595420867204666,
+  "final_train_macro_mse": 0.015157206682488322,
+  "final_val_macro_mse": 0.014978098683059216
+}

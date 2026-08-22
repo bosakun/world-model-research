@@ -1,0 +1,20 @@
+{
+  "dataset_version": "controlled-oscillator-v1-macro5",
+  "evaluation_sequences": 64,
+  "chunk_size": 5,
+  "primitive_horizon": 30,
+  "macro_rollout_steps": 6,
+  "teacher_forced_macro_mse": 0.016750963404774666,
+  "macro_rollout_mean_mse": 0.49071616601819795,
+  "macro_rollout_mse_by_primitive_horizon": {
+    "5": 0.011313165538012981,
+    "10": 0.1059638112783432,
+    "15": 0.31774863600730896,
+    "20": 0.5413604974746704,
+    "25": 0.7822799682617188,
+    "30": 1.1856309175491333
+  },
+  "macro_rollout_mse_horizon_30": 1.1856309175491333,
+  "parameter_count": 10178,
+  "evaluation_entry_point": "python 05_long_horizon/02_temporal_abstraction/evaluate.py"
+}
