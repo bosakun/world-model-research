@@ -1,0 +1,17 @@
+{
+  "dataset_version": "controlled-oscillator-v1",
+  "seed": 47,
+  "epochs": 80,
+  "training_steps": 320,
+  "optimizer": "Adam",
+  "learning_rate": 0.001,
+  "overshooting_distance": 5,
+  "overshooting_weight": 0.5,
+  "parameter_count": 4738,
+  "checkpoint_format_version": 1,
+  "initial_train_total": 0.0525928633287549,
+  "final_train_total": 0.002688823558855802,
+  "final_val_total": 0.002114171627908945,
+  "final_val_one_step": 0.0001471136638429016,
+  "final_val_overshooting": 0.00393411610275507
+}

@@ -53,6 +53,12 @@ The year below follows the first public paper/proceedings record. Metadata and U
 | Not Read | Mastering Atari, Go, Chess and Shogi by Planning with a Learned Model (MuZero) | Julian Schrittwieser et al. | 2020 | https://doi.org/10.1038/s41586-020-03051-4 | Planning-relevant representation, dynamics, reward/value/policy, MCTS |
 | Not Read | TD-MPC2: Scalable, Robust World Models for Continuous Control | Nicklas Hansen, Hao Su, Xiaolong Wang | 2023 | https://arxiv.org/abs/2310.16828 | Decoder-free latent model, local trajectory optimization, scaling |
 
+## Temporal Abstraction
+
+| Status | Paper | Authors | Year | Primary source | Roadmap relevance |
+|---|---|---|---:|---|---|
+| Reading | Between MDPs and Semi-MDPs: A Framework for Temporal Abstraction in Reinforcement Learning | Richard S. Sutton, Doina Precup, Satinder Singh | 1999 | https://doi.org/10.1016/S0004-3702(99)00052-1 | Options/macro-action framing for `05_long_horizon/02_temporal_abstraction`; full option learning is not planned in this smoke phase |
+
 ## Transformer World Models
 
 | Status | Paper | Authors | Year | Primary source | Roadmap relevance |

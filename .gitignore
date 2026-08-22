@@ -8,3 +8,4 @@ __pycache__/
 03_memory/04_transformer_memory/outputs/checkpoint.pt
 04_uncertainty/01_probabilistic_dynamics/outputs/checkpoint.pt
 04_uncertainty/02_ensemble/outputs/checkpoint.pt
+05_long_horizon/01_latent_overshooting/outputs/checkpoint.pt
