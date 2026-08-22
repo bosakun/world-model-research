@@ -56,7 +56,8 @@ The year below follows the first public paper/proceedings record. Metadata and U
 
 | Status | Paper | Authors | Year | Primary source | Roadmap relevance |
 |---|---|---|---:|---|---|
-| Not Read | TransDreamer: Reinforcement Learning with Transformer World Models | Chang Chen, Yi-Fu Wu, Jaesik Yoon, Sungjin Ahn | 2022 | https://arxiv.org/abs/2202.09481 | Transformer State-Space Model and long-range memory |
+| Implemented | TransDreamer: Reinforcement Learning with Transformer World Models | Chang Chen, Yi-Fu Wu, Jaesik Yoon, Sungjin Ahn | 2022 | https://arxiv.org/abs/2202.09481 | Simplified causal Transformer memory mechanism in `03_memory/04_transformer_memory`; stochastic TSSM and policy are not reproduced |
+| Implemented | Attention Is All You Need | Ashish Vaswani et al. | 2017 | https://arxiv.org/abs/1706.03762 | Multi-head attention, positional information, causal mask, residual FFN in `03_memory/04_transformer_memory` |
 
 ## Object-Centric World Models
 

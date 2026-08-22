@@ -1,0 +1,44 @@
+{
+  "dataset_version": "partial-observation-v1",
+  "evaluation_sequences": 32,
+  "autoencoder_reconstruction_mse": 0.0014814455062150955,
+  "teacher_forced_one_step_pixel_mse": 0.0009640959906391799,
+  "teacher_forced_state_head_goal_class_accuracy": 1.0,
+  "autoregressive_rollout_mean_pixel_mse": 0.000964186812780099,
+  "autoregressive_rollout_pixel_mse_by_horizon": [
+    0.001953535247594118,
+    0.00011044556595152244,
+    0.0004583322152029723,
+    0.0008924527210183442,
+    0.001422566594555974,
+    0.0009477885323576629
+  ],
+  "autoregressive_rollout_mean_state_head_goal_class_accuracy": 1.0,
+  "autoregressive_rollout_state_head_goal_class_accuracy_by_horizon": [
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0
+  ],
+  "latent_shape": [
+    32,
+    7,
+    16
+  ],
+  "token_shape": [
+    32,
+    6,
+    64
+  ],
+  "attention_shape": [
+    2,
+    32,
+    4,
+    6,
+    6
+  ],
+  "parameter_count": 406794,
+  "evaluation_entry_point": "python 03_memory/04_transformer_memory/evaluate.py"
+}

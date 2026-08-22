@@ -5,3 +5,4 @@ __pycache__/
 .pytest_cache/
 03_memory/01_gru/outputs/checkpoint.pt
 03_memory/03_rssm/outputs/checkpoint.pt
+03_memory/04_transformer_memory/outputs/checkpoint.pt

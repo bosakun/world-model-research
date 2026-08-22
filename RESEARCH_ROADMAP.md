@@ -25,7 +25,7 @@ Statuses: `Not Started`, `Reading`, `Implementing`, `Evaluating`, `Completed`, `
 - **Completed** — `01_gru`: deterministic recurrent latent dynamics on fully observable Grid World
 - **Completed** — `02_partial_observation`: paired local-view aliases establish equal observations with different hidden Goal states; model comparison deferred
 - **Completed** — `03_rssm`: continuous-Gaussian deterministic/stochastic recurrent state, prior/posterior, reparameterization, KL, reconstruction, and prior-only rollout (21 combined tests passed; one-seed smoke run, not a comparison)
-- **Not Started** — `04_transformer_memory`: attention-based temporal context
+- **Completed** — `04_transformer_memory`: latent/action tokens, learned positions, multi-head causal attention, teacher-forced prediction, autoregressive rollout, and attention visualization (29 combined tests passed; one-seed smoke run)
 - **Deferred to Phase 90** — matched No Memory / GRU / RSSM / Transformer comparison and memory ablations
 
 ### 03/01 hypothesis
@@ -46,7 +46,7 @@ Adding a GRU hidden state creates a valid mechanism for retaining trajectory his
 
 ## 04 Uncertainty
 
-- **Not Started** — Probabilistic transition model
+- **Implementing** — Probabilistic transition model (aleatoric uncertainty)
 - **Not Started** — Ensemble epistemic uncertainty and calibration
 - **Not Started** — Uncertainty-aware rollout/planning (PETS lineage)
 

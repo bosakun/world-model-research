@@ -1,0 +1,16 @@
+{
+  "dataset_version": "partial-observation-v1",
+  "seed": 29,
+  "epochs": 40,
+  "training_steps": 160,
+  "optimizer": "Adam",
+  "learning_rate": 0.003,
+  "parameter_count": 406794,
+  "checkpoint_format_version": 1,
+  "initial_train_total": 1.7949207127094269,
+  "final_train_total": 0.04390730895102024,
+  "final_val_total": 0.035018302500247955,
+  "final_val_prediction_image": 0.011990913189947605,
+  "final_val_latent_prediction": 9.412725921720266e-05,
+  "final_val_goal_classification": 0.00014686000940855592
+}
