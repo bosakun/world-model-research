@@ -35,9 +35,9 @@ The year below follows the first public paper/proceedings record. Metadata and U
 
 | Status | Paper | Authors | Year | Primary source | Roadmap relevance |
 |---|---|---|---:|---|---|
-| Reading | Dream to Control: Learning Behaviors by Latent Imagination | Danijar Hafner, Timothy Lillicrap, Jimmy Ba, Mohammad Norouzi | 2019 | https://arxiv.org/abs/1912.01603 | RSSM/free-nats and reward/value/continuation-aligned interfaces implemented; actor-critic imagination remains Phase 08 |
-| Not Read | Mastering Atari with Discrete World Models (DreamerV2) | Danijar Hafner, Timothy Lillicrap, Mohammad Norouzi, Jimmy Ba | 2020 | https://arxiv.org/abs/2010.02193 | Discrete latent world model and imagined behavior learning |
-| Not Read | Mastering Diverse Domains through World Models (DreamerV3) | Danijar Hafner, Jurgis Pasukonis, Jimmy Ba, Timothy Lillicrap | 2023 | https://arxiv.org/abs/2301.04104 | Robust scaling, normalization, balancing, transformations |
+| Implemented | Dream to Control: Learning Behaviors by Latent Imagination | Danijar Hafner, Timothy Lillicrap, Jimmy Ba, Mohammad Norouzi | 2019 | https://arxiv.org/abs/1912.01603 | Simplified differentiable latent imagination, λ-return actor/critic, and target critic in `08_imagination_rl/01_actor_critic`; not full Dreamer |
+| Overview Read | Mastering Atari with Discrete World Models (DreamerV2) | Danijar Hafner, Timothy Lillicrap, Mohammad Norouzi, Jimmy Ba | 2020 | https://arxiv.org/abs/2010.02193 | Discrete latent and behavior-learning differences documented in Phase 08; categorical state not implemented |
+| Overview Read | Mastering Diverse Domains through World Models (DreamerV3) | Danijar Hafner, Jurgis Pasukonis, Jimmy Ba, Timothy Lillicrap | 2023 | https://arxiv.org/abs/2301.04104 | Cross-domain stability mechanisms documented in Phase 08; robust full algorithm not implemented |
 
 ## Uncertainty
 

@@ -68,12 +68,12 @@ Adding a GRU hidden state creates a valid mechanism for retaining trajectory his
 
 ## 08 Imagination RL
 
-- **Implementing** — `01_actor_critic`: actor/value learning from imagined trajectories
-- **Not Started** — Dreamer-family comparisons
+- **Completed** — `01_actor_critic`: reparameterized actor, EMA critic, λ-returns, frozen learned-world imagination, and exact-world audit (four tests; behavior policy exposed model exploitation)
+- **Completed (documentation scope)** — Dreamer/DreamerV2/DreamerV3 mechanism comparison; full algorithms remain outside this educational implementation
 
 ## 09 Spatial Representation
 
-- **Not Started** — Structured/object-centric state
+- **Implementing** — `01_cswm`: object-factorized representation, relational transition, and contrastive objective
 - **Not Started** — Slot Attention and SlotFormer
 - **Not Started** — 3D occupancy representation
 

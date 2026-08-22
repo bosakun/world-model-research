@@ -1,0 +1,13 @@
+{
+  "dataset_version": "point-world-imagination-starts-v1",
+  "seed": 131,
+  "success": false,
+  "executed_steps": 20,
+  "initial_distance": 2.2671568393707275,
+  "final_distance": 0.512823760509491,
+  "distance_reduction_fraction": 0.7738031148910522,
+  "exact_total_reward": -16.178653717041016,
+  "deterministic_actor_evaluation": true,
+  "real_environment_used_for_behavior_training": false,
+  "evaluation_entry_point": "python 08_imagination_rl/01_actor_critic/evaluate.py"
+}
