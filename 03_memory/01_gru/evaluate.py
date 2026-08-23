@@ -98,6 +98,8 @@ def evaluate(checkpoint_path: Path, output_dir: Path) -> dict[str, object]:
     # it is deliberately not presented as a trained performance comparison.
     baseline = SimpleDynamics(config.latent_dim, config.action_dim, config.hidden_dim)
     metrics: dict[str, object] = {
+        "dataset_version": config.dataset_version,
+        "seed": config.seed,
         "evaluation_sequences": len(dataset),
         "one_step_latent_mse": one_step_latent_mse,
         "one_step_pixel_mse": one_step_pixel_mse,
@@ -112,6 +114,7 @@ def evaluate(checkpoint_path: Path, output_dir: Path) -> dict[str, object]:
         "simple_dynamics_parameter_count": parameter_count(baseline),
         "mean_rollout_seconds_per_sequence": elapsed / (100 * len(dataset)),
         "baseline_performance": "not measured; baseline is retained for a controlled later comparison",
+        "evaluation_entry_point": "python 03_memory/01_gru/evaluate.py",
     }
     save_json(output_dir / "evaluation_metrics.json", metrics)
     print(metrics)

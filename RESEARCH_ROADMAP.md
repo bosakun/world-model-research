@@ -96,13 +96,13 @@ Adding a GRU hidden state creates a valid mechanism for retaining trajectory his
 
 ## 90 Evaluation
 
-- **Implementing** — Unified No Memory / GRU / RSSM / Transformer Memory evaluation
-- **Not Started** — One/5/10-step and long-horizon prediction under matched data and seeds
-- **Not Started** — Uncertainty calibration, planning success, parameter/latency/memory accounting
-- **Not Started** — Ablations, multiple seeds, and training stability
+- **Completed** — `01_memory_benchmark`: unified No Memory / GRU / RSSM / Transformer comparison
+- **Completed** — Matched one/5/10-step prediction, hidden-Goal accuracy, three seeds, memory ablations, training stability
+- **Completed** — Parameter count/FP32 byte lower bound and CPU rollout latency; existing uncertainty calibration/planning success evidence cataloged
+- **Completed** — `02_system_registry`: 23 executable cross-phase evaluation artifacts with dataset/seed/entry-point provenance
 
 ## 99 Integrated World Model
 
-- **Not Started** — Select components from controlled comparisons
+- **Implementing** — Select components from controlled comparisons and record evidence strength
 - **Not Started** — Integrate perception, memory, dynamics, uncertainty, imagination, reward/value, and planning
 - **Not Started** — End-to-end smoke test and evidence-based component decision record

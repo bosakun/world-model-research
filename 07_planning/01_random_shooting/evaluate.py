@@ -43,6 +43,7 @@ def evaluate(output_dir: Path = ROOT / "outputs") -> dict[str, object]:
     plt.close(figure)
     metrics = {
         **config.to_dict(),
+        "dataset_version": "exact-point-world-v1",
         "initial_distance": float(torch.linalg.vector_norm(initial[:2] - initial[2:])),
         "final_predicted_distance": float(distances[-1]),
         "distance_reduction_fraction": float(1.0 - distances[-1] / torch.linalg.vector_norm(initial[:2] - initial[2:])),

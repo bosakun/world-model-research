@@ -49,6 +49,7 @@ def evaluate(output_dir: Path = ROOT / "outputs") -> dict[str, object]:
     initial_distance = torch.linalg.vector_norm(initial[:2] - initial[2:])
     metrics = {
         **config.to_dict(),
+        "dataset_version": "exact-point-world-v1",
         "initial_distance": float(initial_distance),
         "final_predicted_distance": float(final_distance),
         "distance_reduction_fraction": float(1.0 - final_distance / initial_distance),

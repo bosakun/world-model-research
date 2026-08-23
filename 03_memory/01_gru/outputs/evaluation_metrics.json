@@ -1,4 +1,6 @@
 {
+  "dataset_version": "fully-observable-gridworld-sequences-v1",
+  "seed": 7,
   "evaluation_sequences": 64,
   "one_step_latent_mse": 0.14136537909507751,
   "one_step_pixel_mse": 0.005980079527944326,
@@ -38,5 +40,6 @@
   "gru_dynamics_parameter_count": 21712,
   "simple_dynamics_parameter_count": 6544,
   "mean_rollout_seconds_per_sequence": 6.979368437782796e-06,
-  "baseline_performance": "not measured; baseline is retained for a controlled later comparison"
+  "baseline_performance": "not measured; baseline is retained for a controlled later comparison",
+  "evaluation_entry_point": "python 03_memory/01_gru/evaluate.py"
 }

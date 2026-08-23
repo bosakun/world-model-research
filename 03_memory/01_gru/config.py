@@ -3,6 +3,7 @@ from dataclasses import asdict, dataclass
 
 @dataclass(frozen=True)
 class ExperimentConfig:
+    dataset_version: str = "fully-observable-gridworld-sequences-v1"
     grid_size: int = 5
     cell_size: int = 4
     sequence_length: int = 8
@@ -23,5 +24,5 @@ class ExperimentConfig:
     def image_size(self) -> int:
         return self.grid_size * self.cell_size
 
-    def to_dict(self) -> dict[str, int | float]:
+    def to_dict(self) -> dict[str, int | float | str]:
         return asdict(self)

@@ -1,4 +1,5 @@
 {
+  "dataset_version": "exact-point-world-v1",
   "model_version": "exact-point-world-v1",
   "horizon": 10,
   "candidates": 512,

@@ -1,0 +1,688 @@
+{
+  "registry_version": 1,
+  "experiment_count": 23,
+  "phase_counts": {
+    "03_memory": 3,
+    "04_uncertainty": 2,
+    "05_long_horizon": 2,
+    "06_reward_value": 1,
+    "07_planning": 4,
+    "08_imagination_rl": 1,
+    "09_spatial_representation": 4,
+    "10_video_world_model": 3,
+    "11_multimodal": 1,
+    "12_physical_ai": 2
+  },
+  "experiments": [
+    {
+      "phase": "03_memory",
+      "experiment": "03_memory/01_gru",
+      "metrics_path": "03_memory/01_gru/outputs/evaluation_metrics.json",
+      "dataset_version": "fully-observable-gridworld-sequences-v1",
+      "seed": 7,
+      "evaluation_entry_point": "python 03_memory/01_gru/evaluate.py",
+      "metrics": {
+        "dataset_version": "fully-observable-gridworld-sequences-v1",
+        "seed": 7,
+        "evaluation_sequences": 64,
+        "one_step_latent_mse": 0.14136537909507751,
+        "one_step_pixel_mse": 0.005980079527944326,
+        "one_step_agent_position_accuracy": 0.8359375,
+        "rollout_mean_pixel_mse": 0.008376324782148004,
+        "rollout_pixel_mse_by_horizon": [
+          0.006331759504973888,
+          0.006556179374456406,
+          0.007767097093164921,
+          0.00826538447290659,
+          0.008876526728272438,
+          0.009282384067773819,
+          0.010043610818684101,
+          0.009887656196951866
+        ],
+        "rollout_agent_position_accuracy": 0.55859375,
+        "rollout_agent_position_accuracy_by_horizon": [
+          0.75,
+          0.765625,
+          0.640625,
+          0.546875,
+          0.515625,
+          0.5,
+          0.375,
+          0.375
+        ],
+        "hidden_shape": [
+          64,
+          8,
+          64
+        ],
+        "rollout_hidden_shape": [
+          64,
+          8,
+          64
+        ],
+        "gru_dynamics_parameter_count": 21712,
+        "simple_dynamics_parameter_count": 6544,
+        "mean_rollout_seconds_per_sequence": 6.979368437782796e-06,
+        "baseline_performance": "not measured; baseline is retained for a controlled later comparison",
+        "evaluation_entry_point": "python 03_memory/01_gru/evaluate.py"
+      }
+    },
+    {
+      "phase": "03_memory",
+      "experiment": "03_memory/03_rssm",
+      "metrics_path": "03_memory/03_rssm/outputs/evaluation_metrics.json",
+      "dataset_version": "partial-observation-v1",
+      "seed": "unrecorded",
+      "evaluation_entry_point": "python 03_memory/03_rssm/evaluate.py",
+      "metrics": {
+        "dataset_version": "partial-observation-v1",
+        "evaluation_sequences": 32,
+        "posterior_reconstruction_mse": 0.0007455364684574306,
+        "posterior_state_head_goal_class_accuracy": 1.0,
+        "one_step_prior_pixel_mse": 0.0006179036572575569,
+        "one_step_prior_state_head_goal_class_accuracy": 1.0,
+        "prior_rollout_mean_pixel_mse": 0.000628432911374451,
+        "prior_rollout_pixel_mse_by_horizon": [
+          0.0004251272475812584,
+          3.0957089620642364e-05,
+          0.00038141896948218346,
+          0.000850380165502429,
+          0.0010345748160034418,
+          0.0010481391800567508
+        ],
+        "prior_rollout_mean_state_head_goal_class_accuracy": 1.0,
+        "prior_rollout_state_head_goal_class_accuracy_by_horizon": [
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "deterministic_state_shape": [
+          32,
+          7,
+          64
+        ],
+        "stochastic_state_shape": [
+          32,
+          7,
+          16
+        ],
+        "prior_parameter_shape": [
+          32,
+          7,
+          16
+        ],
+        "posterior_parameter_shape": [
+          32,
+          7,
+          16
+        ],
+        "parameter_count": 428330,
+        "evaluation_entry_point": "python 03_memory/03_rssm/evaluate.py"
+      }
+    },
+    {
+      "phase": "03_memory",
+      "experiment": "03_memory/04_transformer_memory",
+      "metrics_path": "03_memory/04_transformer_memory/outputs/evaluation_metrics.json",
+      "dataset_version": "partial-observation-v1",
+      "seed": "unrecorded",
+      "evaluation_entry_point": "python 03_memory/04_transformer_memory/evaluate.py",
+      "metrics": {
+        "dataset_version": "partial-observation-v1",
+        "evaluation_sequences": 32,
+        "autoencoder_reconstruction_mse": 0.0014814455062150955,
+        "teacher_forced_one_step_pixel_mse": 0.0009640959906391799,
+        "teacher_forced_state_head_goal_class_accuracy": 1.0,
+        "autoregressive_rollout_mean_pixel_mse": 0.000964186812780099,
+        "autoregressive_rollout_pixel_mse_by_horizon": [
+          0.001953535247594118,
+          0.00011044556595152244,
+          0.0004583322152029723,
+          0.0008924527210183442,
+          0.001422566594555974,
+          0.0009477885323576629
+        ],
+        "autoregressive_rollout_mean_state_head_goal_class_accuracy": 1.0,
+        "autoregressive_rollout_state_head_goal_class_accuracy_by_horizon": [
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "latent_shape": [
+          32,
+          7,
+          16
+        ],
+        "token_shape": [
+          32,
+          6,
+          64
+        ],
+        "attention_shape": [
+          2,
+          32,
+          4,
+          6,
+          6
+        ],
+        "parameter_count": 406794,
+        "evaluation_entry_point": "python 03_memory/04_transformer_memory/evaluate.py"
+      }
+    },
+    {
+      "phase": "04_uncertainty",
+      "experiment": "04_uncertainty/01_probabilistic_dynamics",
+      "metrics_path": "04_uncertainty/01_probabilistic_dynamics/outputs/evaluation_metrics.json",
+      "dataset_version": "heteroscedastic-point-v1",
+      "seed": "unrecorded",
+      "evaluation_entry_point": "python 04_uncertainty/01_probabilistic_dynamics/evaluate.py",
+      "metrics": {
+        "dataset_version": "heteroscedastic-point-v1",
+        "evaluation_transitions": 256,
+        "next_state_rmse": 0.05685743689537048,
+        "gaussian_nll": -3.593069553375244,
+        "coverage_within_1_std": 0.6953125,
+        "coverage_within_2_std": 0.953125,
+        "predicted_true_std_correlation": 0.9376348713134565,
+        "mean_predicted_std": [
+          0.053192757070064545,
+          0.04526836425065994
+        ],
+        "mean_true_std": [
+          0.05391598120331764,
+          0.043789058923721313
+        ],
+        "rollout_horizon": 12,
+        "rollout_samples": 64,
+        "parameter_count": 4872,
+        "evaluation_entry_point": "python 04_uncertainty/01_probabilistic_dynamics/evaluate.py"
+      }
+    },
+    {
+      "phase": "04_uncertainty",
+      "experiment": "04_uncertainty/02_ensemble",
+      "metrics_path": "04_uncertainty/02_ensemble/outputs/evaluation_metrics.json",
+      "dataset_version": "heteroscedastic-point-v1",
+      "seed": "unrecorded",
+      "evaluation_entry_point": "python 04_uncertainty/02_ensemble/evaluate.py",
+      "metrics": {
+        "dataset_version": "heteroscedastic-point-v1",
+        "ensemble_size": 5,
+        "evaluation_transitions": 256,
+        "moment_matched_gaussian_nll": -3.5822978019714355,
+        "next_state_rmse": 0.060513127595186234,
+        "coverage_within_1_total_std": 0.732421875,
+        "coverage_within_2_total_std": 0.966796875,
+        "aleatoric_predicted_true_std_correlation": 0.952626280118526,
+        "in_distribution_epistemic_std": 0.010660689324140549,
+        "out_of_distribution_epistemic_std": 0.016399553045630455,
+        "ood_to_id_epistemic_ratio": 1.5383201354995462,
+        "mean_in_distribution_aleatoric_std": 0.052202023565769196,
+        "rollout_horizon": 12,
+        "rollout_particles_per_method": 128,
+        "propagation_methods": [
+          "ts_infinity",
+          "ts1"
+        ],
+        "parameter_count": 24360,
+        "evaluation_entry_point": "python 04_uncertainty/02_ensemble/evaluate.py"
+      }
+    },
+    {
+      "phase": "05_long_horizon",
+      "experiment": "05_long_horizon/01_latent_overshooting",
+      "metrics_path": "05_long_horizon/01_latent_overshooting/outputs/evaluation_metrics.json",
+      "dataset_version": "controlled-oscillator-v1",
+      "seed": "unrecorded",
+      "evaluation_entry_point": "python 05_long_horizon/01_latent_overshooting/evaluate.py",
+      "metrics": {
+        "dataset_version": "controlled-oscillator-v1",
+        "evaluation_sequences": 64,
+        "teacher_forced_one_step_mse": 0.00016053536091931164,
+        "overshooting_mean_mse": 0.004347627516835928,
+        "overshooting_mse_by_distance_1_to_5": [
+          0.00016053531726356596,
+          0.0008968933252617717,
+          0.0027737331110984087,
+          0.006444933358579874,
+          0.012544774450361729
+        ],
+        "autoregressive_rollout_mean_mse": 0.45652457381729616,
+        "autoregressive_rollout_mse_by_horizon": [
+          6.648911949014291e-05,
+          0.0003862143203150481,
+          0.0012527051148936152,
+          0.0030277136247605085,
+          0.0062287175096571445,
+          0.011463943868875504,
+          0.01947532407939434,
+          0.031017029657959938,
+          0.04655100032687187,
+          0.06646271795034409,
+          0.090958371758461,
+          0.12084958702325821,
+          0.1557951122522354,
+          0.1960025429725647,
+          0.24281269311904907,
+          0.2974334955215454,
+          0.35700228810310364,
+          0.4230172634124756,
+          0.49710649251937866,
+          0.575294554233551,
+          0.6583451628684998,
+          0.7461385130882263,
+          0.8394500613212585,
+          0.9345982670783997,
+          1.0276100635528564,
+          1.1174113750457764,
+          1.200575351715088,
+          1.2749874591827393,
+          1.3457225561141968,
+          1.4086941480636597
+        ],
+        "rollout_mse_horizon_5": 0.0062287175096571445,
+        "rollout_mse_horizon_10": 0.06646271795034409,
+        "rollout_mse_horizon_30": 1.4086941480636597,
+        "parameter_count": 4738,
+        "evaluation_entry_point": "python 05_long_horizon/01_latent_overshooting/evaluate.py"
+      }
+    },
+    {
+      "phase": "05_long_horizon",
+      "experiment": "05_long_horizon/02_temporal_abstraction",
+      "metrics_path": "05_long_horizon/02_temporal_abstraction/outputs/evaluation_metrics.json",
+      "dataset_version": "controlled-oscillator-v1-macro5",
+      "seed": "unrecorded",
+      "evaluation_entry_point": "python 05_long_horizon/02_temporal_abstraction/evaluate.py",
+      "metrics": {
+        "dataset_version": "controlled-oscillator-v1-macro5",
+        "evaluation_sequences": 64,
+        "chunk_size": 5,
+        "primitive_horizon": 30,
+        "macro_rollout_steps": 6,
+        "teacher_forced_macro_mse": 0.016750963404774666,
+        "macro_rollout_mean_mse": 0.49071616601819795,
+        "macro_rollout_mse_by_primitive_horizon": {
+          "5": 0.011313165538012981,
+          "10": 0.1059638112783432,
+          "15": 0.31774863600730896,
+          "20": 0.5413604974746704,
+          "25": 0.7822799682617188,
+          "30": 1.1856309175491333
+        },
+        "macro_rollout_mse_horizon_30": 1.1856309175491333,
+        "parameter_count": 10178,
+        "evaluation_entry_point": "python 05_long_horizon/02_temporal_abstraction/evaluate.py"
+      }
+    },
+    {
+      "phase": "06_reward_value",
+      "experiment": "06_reward_value/01_prediction_heads",
+      "metrics_path": "06_reward_value/01_prediction_heads/outputs/evaluation_metrics.json",
+      "dataset_version": "goal-navigation-v1",
+      "seed": "unrecorded",
+      "evaluation_entry_point": "python 06_reward_value/01_prediction_heads/evaluate.py",
+      "metrics": {
+        "dataset_version": "goal-navigation-v1",
+        "evaluation_sequences": 128,
+        "valid_transitions": 568,
+        "terminal_transitions": 128,
+        "reward_rmse": 0.25150206685066223,
+        "value_rmse": 0.13537393510341644,
+        "continuation_accuracy": 0.9735915660858154,
+        "continuation_brier": 0.03194151073694229,
+        "mean_continuation_probability_on_terminal": 0.18201114237308502,
+        "mean_continuation_probability_on_nonterminal": 0.9501581192016602,
+        "discount": 0.95,
+        "parameter_count": 9091,
+        "evaluation_entry_point": "python 06_reward_value/01_prediction_heads/evaluate.py"
+      }
+    },
+    {
+      "phase": "07_planning",
+      "experiment": "07_planning/01_random_shooting",
+      "metrics_path": "07_planning/01_random_shooting/outputs/evaluation_metrics.json",
+      "dataset_version": "exact-point-world-v1",
+      "seed": 67,
+      "evaluation_entry_point": "python 07_planning/01_random_shooting/evaluate.py",
+      "metrics": {
+        "dataset_version": "exact-point-world-v1",
+        "model_version": "exact-point-world-v1",
+        "horizon": 10,
+        "candidates": 4096,
+        "discount": 0.97,
+        "seed": 67,
+        "initial_distance": 2.2671568393707275,
+        "final_predicted_distance": 1.3088527917861938,
+        "distance_reduction_fraction": 0.4226897954940796,
+        "selected_predicted_score": -15.741778373718262,
+        "mean_candidate_score": -20.854949951171875,
+        "evaluation_entry_point": "python 07_planning/01_random_shooting/evaluate.py"
+      }
+    },
+    {
+      "phase": "07_planning",
+      "experiment": "07_planning/02_cem",
+      "metrics_path": "07_planning/02_cem/outputs/evaluation_metrics.json",
+      "dataset_version": "exact-point-world-v1",
+      "seed": 71,
+      "evaluation_entry_point": "python 07_planning/02_cem/evaluate.py",
+      "metrics": {
+        "dataset_version": "exact-point-world-v1",
+        "model_version": "exact-point-world-v1",
+        "horizon": 10,
+        "candidates": 512,
+        "elites": 64,
+        "iterations": 5,
+        "discount": 0.97,
+        "momentum": 0.1,
+        "seed": 71,
+        "initial_distance": 2.2671568393707275,
+        "final_predicted_distance": 0.6068660020828247,
+        "distance_reduction_fraction": 0.7323228716850281,
+        "selected_predicted_score": -11.865666389465332,
+        "final_mean_action_std": 0.27210259437561035,
+        "iteration_best_scores": [
+          -16.029264450073242,
+          -13.651368141174316,
+          -13.720937728881836,
+          -12.346899032592773,
+          -11.865666389465332
+        ],
+        "evaluation_entry_point": "python 07_planning/02_cem/evaluate.py"
+      }
+    },
+    {
+      "phase": "07_planning",
+      "experiment": "07_planning/03_mpc",
+      "metrics_path": "07_planning/03_mpc/outputs/evaluation_metrics.json",
+      "dataset_version": "exact-point-world-v1",
+      "seed": 73,
+      "evaluation_entry_point": "python 07_planning/03_mpc/evaluate.py",
+      "metrics": {
+        "dataset_version": "exact-point-world-v1",
+        "model_version": "exact-point-world-v1",
+        "planning_horizon": 8,
+        "candidates": 256,
+        "elites": 32,
+        "cem_iterations": 4,
+        "discount": 0.97,
+        "max_environment_steps": 20,
+        "seed": 73,
+        "success": true,
+        "executed_steps": 12,
+        "replanning_calls": 12,
+        "initial_distance": 2.2671568393707275,
+        "final_distance": 0.0006452700472436845,
+        "total_environment_reward": -11.336052894592285,
+        "evaluation_entry_point": "python 07_planning/03_mpc/evaluate.py"
+      }
+    },
+    {
+      "phase": "07_planning",
+      "experiment": "07_planning/04_latent_planning",
+      "metrics_path": "07_planning/04_latent_planning/outputs/evaluation_metrics.json",
+      "dataset_version": "point-world-latent-planning-v1",
+      "seed": 101,
+      "evaluation_entry_point": "python 07_planning/04_latent_planning/evaluate.py",
+      "metrics": {
+        "dataset_version": "point-world-latent-planning-v1",
+        "seed": 101,
+        "planning_horizon": 10,
+        "candidates": 512,
+        "elites": 64,
+        "cem_iterations": 6,
+        "learned_latent_score": -11.470324516296387,
+        "exact_world_score": -12.497681617736816,
+        "initial_distance": 2.2671568393707275,
+        "final_distance": 0.9858037829399109,
+        "distance_reduction_fraction": 0.5651805996894836,
+        "uses_observation_decoder": false,
+        "evaluation_entry_point": "python 07_planning/04_latent_planning/evaluate.py"
+      }
+    },
+    {
+      "phase": "08_imagination_rl",
+      "experiment": "08_imagination_rl/01_actor_critic",
+      "metrics_path": "08_imagination_rl/01_actor_critic/outputs/evaluation_metrics.json",
+      "dataset_version": "point-world-imagination-starts-v1",
+      "seed": 131,
+      "evaluation_entry_point": "python 08_imagination_rl/01_actor_critic/evaluate.py",
+      "metrics": {
+        "dataset_version": "point-world-imagination-starts-v1",
+        "seed": 131,
+        "success": false,
+        "executed_steps": 20,
+        "initial_distance": 2.2671568393707275,
+        "final_distance": 0.512823760509491,
+        "distance_reduction_fraction": 0.7738031148910522,
+        "exact_total_reward": -16.178653717041016,
+        "deterministic_actor_evaluation": true,
+        "real_environment_used_for_behavior_training": false,
+        "evaluation_entry_point": "python 08_imagination_rl/01_actor_critic/evaluate.py"
+      }
+    },
+    {
+      "phase": "09_spatial_representation",
+      "experiment": "09_spatial_representation/01_cswm",
+      "metrics_path": "09_spatial_representation/01_cswm/outputs/evaluation_metrics.json",
+      "dataset_version": "two-object-relational-v1",
+      "seed": 151,
+      "evaluation_entry_point": "python 09_spatial_representation/01_cswm/evaluate.py",
+      "metrics": {
+        "dataset_version": "two-object-relational-v1",
+        "seed": 151,
+        "current_position_probe_rmse": 0.005870726890861988,
+        "predicted_next_position_probe_rmse": 0.013061895966529846,
+        "slot_assignment": "fixed by color channel",
+        "evaluation_entry_point": "python 09_spatial_representation/01_cswm/evaluate.py"
+      }
+    },
+    {
+      "phase": "09_spatial_representation",
+      "experiment": "09_spatial_representation/02_slot_attention",
+      "metrics_path": "09_spatial_representation/02_slot_attention/outputs/evaluation_metrics.json",
+      "dataset_version": "colored-two-object-images-v2",
+      "seed": 163,
+      "evaluation_entry_point": "python 09_spatial_representation/02_slot_attention/evaluate.py",
+      "metrics": {
+        "dataset_version": "colored-two-object-images-v2",
+        "seed": 163,
+        "reconstruction_mse": 0.01453031599521637,
+        "mean_best_permutation_iou": 0.2713397741317749,
+        "best_example_iou": 0.34365078806877136,
+        "evaluation_entry_point": "python 09_spatial_representation/02_slot_attention/evaluate.py"
+      }
+    },
+    {
+      "phase": "09_spatial_representation",
+      "experiment": "09_spatial_representation/03_slotformer",
+      "metrics_path": "09_spatial_representation/03_slotformer/outputs/evaluation_metrics.json",
+      "dataset_version": "relational-slot-sequences-v1",
+      "seed": 179,
+      "evaluation_entry_point": "python 09_spatial_representation/03_slotformer/evaluate.py",
+      "metrics": {
+        "dataset_version": "relational-slot-sequences-v1",
+        "seed": 179,
+        "context_frames": 4,
+        "rollout_frames": 8,
+        "rollout_rmse_by_horizon": [
+          0.03033454716205597,
+          0.06161026656627655,
+          0.09476950019598007,
+          0.1305781453847885,
+          0.1649465411901474,
+          0.19910211861133575,
+          0.23336990177631378,
+          0.2681759297847748
+        ],
+        "final_rollout_rmse": 0.2681759297847748,
+        "evaluation_entry_point": "python 09_spatial_representation/03_slotformer/evaluate.py"
+      }
+    },
+    {
+      "phase": "09_spatial_representation",
+      "experiment": "09_spatial_representation/04_occupancy_3d",
+      "metrics_path": "09_spatial_representation/04_occupancy_3d/outputs/evaluation_metrics.json",
+      "dataset_version": "moving-voxel-sphere-v1",
+      "seed": 191,
+      "evaluation_entry_point": "python 09_spatial_representation/04_occupancy_3d/evaluate.py",
+      "metrics": {
+        "dataset_version": "moving-voxel-sphere-v1",
+        "seed": 191,
+        "voxel_iou_by_horizon": [
+          0.8080660700798035,
+          0.7963311672210693,
+          0.8017282485961914,
+          0.776630699634552,
+          0.7623026967048645,
+          0.7456778883934021
+        ],
+        "final_voxel_iou": 0.7456778883934021,
+        "threshold": 0.5,
+        "evaluation_entry_point": "python 09_spatial_representation/04_occupancy_3d/evaluate.py"
+      }
+    },
+    {
+      "phase": "10_video_world_model",
+      "experiment": "10_video_world_model/01_vq_video_tokenizer",
+      "metrics_path": "10_video_world_model/01_vq_video_tokenizer/outputs/evaluation_metrics.json",
+      "dataset_version": "moving-square-video-v1",
+      "seed": 211,
+      "evaluation_entry_point": "python 10_video_world_model/01_vq_video_tokenizer/evaluate.py",
+      "metrics": {
+        "dataset_version": "moving-square-video-v1",
+        "seed": 211,
+        "reconstruction_mse": 0.0035650869831442833,
+        "codebook_perplexity": 2.891238212585449,
+        "active_codes": 5,
+        "tokens_per_frame": 16,
+        "evaluation_entry_point": "python 10_video_world_model/01_vq_video_tokenizer/evaluate.py"
+      }
+    },
+    {
+      "phase": "10_video_world_model",
+      "experiment": "10_video_world_model/02_latent_action_dynamics",
+      "metrics_path": "10_video_world_model/02_latent_action_dynamics/outputs/evaluation_metrics.json",
+      "dataset_version": "vq-moving-square-pairs-v2",
+      "seed": 223,
+      "evaluation_entry_point": "python 10_video_world_model/02_latent_action_dynamics/evaluate.py",
+      "metrics": {
+        "dataset_version": "vq-moving-square-pairs-v2",
+        "seed": 223,
+        "latent_to_true_action_permutation": [
+          4,
+          3,
+          0,
+          2,
+          1
+        ],
+        "permutation_action_accuracy": 0.26953125,
+        "next_token_accuracy": 0.8297363519668579,
+        "changed_token_accuracy": 0.7865439653396606,
+        "copy_current_token_accuracy": 0.7771972417831421,
+        "changed_token_fraction": 0.22280272841453552,
+        "latent_action_usage": [
+          270,
+          188,
+          274,
+          368,
+          180
+        ],
+        "rollout_token_accuracy_by_frame": [
+          1.0,
+          0.6875,
+          0.6875,
+          0.625,
+          0.6875,
+          0.5625
+        ],
+        "evaluation_entry_point": "python 10_video_world_model/02_latent_action_dynamics/evaluate.py"
+      }
+    },
+    {
+      "phase": "10_video_world_model",
+      "experiment": "10_video_world_model/03_heterogeneous_simulator",
+      "metrics_path": "10_video_world_model/03_heterogeneous_simulator/outputs/evaluation_metrics.json",
+      "dataset_version": "heterogeneous-square-controls-v1",
+      "seed": 239,
+      "evaluation_entry_point": "python 10_video_world_model/03_heterogeneous_simulator/evaluate.py",
+      "metrics": {
+        "dataset_version": "heterogeneous-square-controls-v1",
+        "seed": 239,
+        "mse_by_source": {
+          "motor": 0.013999705202877522,
+          "language": 0.01416711788624525,
+          "goal": 0.014265657402575016
+        },
+        "max_source_mse": 0.014265657402575016,
+        "evaluation_entry_point": "python 10_video_world_model/03_heterogeneous_simulator/evaluate.py"
+      }
+    },
+    {
+      "phase": "11_multimodal",
+      "experiment": "11_multimodal/01_multimodal_fusion",
+      "metrics_path": "11_multimodal/01_multimodal_fusion/outputs/evaluation_metrics.json",
+      "dataset_version": "multimodal-navigation-v1",
+      "seed": 251,
+      "evaluation_entry_point": "python 11_multimodal/01_multimodal_fusion/evaluate.py",
+      "metrics": {
+        "all_position_rmse": 0.032276302576065063,
+        "no_vision_position_rmse": 0.037369709461927414,
+        "no_proprio_position_rmse": 0.5306780338287354,
+        "no_language_position_rmse": 0.11488918960094452,
+        "no_touch_position_rmse": 0.03513461351394653,
+        "dataset_version": "multimodal-navigation-v1",
+        "seed": 251,
+        "evaluation_entry_point": "python 11_multimodal/01_multimodal_fusion/evaluate.py"
+      }
+    },
+    {
+      "phase": "12_physical_ai",
+      "experiment": "12_physical_ai/01_action_conditioned_jepa",
+      "metrics_path": "12_physical_ai/01_action_conditioned_jepa/outputs/evaluation_metrics.json",
+      "dataset_version": "noisy-robot-transitions-v1",
+      "seed": 271,
+      "evaluation_entry_point": "python 12_physical_ai/01_action_conditioned_jepa/evaluate.py",
+      "metrics": {
+        "dataset_version": "noisy-robot-transitions-v1",
+        "seed": 271,
+        "action_conditioned_probe_rmse": 0.15996421873569489,
+        "zero_action_probe_rmse": 0.1841781884431839,
+        "target_encoder_probe_rmse": 0.013911022804677486,
+        "mean_predicted_latent_std": 0.3457540273666382,
+        "uses_pixel_decoder": false,
+        "evaluation_entry_point": "python 12_physical_ai/01_action_conditioned_jepa/evaluate.py"
+      }
+    },
+    {
+      "phase": "12_physical_ai",
+      "experiment": "12_physical_ai/02_robot_interface",
+      "metrics_path": "12_physical_ai/02_robot_interface/outputs/evaluation_metrics.json",
+      "dataset_version": "safe-mobile-demonstrations-v1",
+      "seed": 283,
+      "evaluation_entry_point": "python 12_physical_ai/02_robot_interface/evaluate.py",
+      "metrics": {
+        "dataset_version": "safe-mobile-demonstrations-v1",
+        "seed": 283,
+        "episodes": 64,
+        "success_rate": 1.0,
+        "mean_final_distance": 0.05250844250258524,
+        "safety_clip_count": 0,
+        "external_hardware_commands_sent": false,
+        "evaluation_entry_point": "python 12_physical_ai/02_robot_interface/evaluate.py"
+      }
+    }
+  ],
+  "limitations": [
+    "Metrics are heterogeneous and are not ranked across tasks.",
+    "Missing multiple-seed evidence remains explicit; only the Phase 90 memory benchmark is matched multi-seed.",
+    "Parameter bytes are a lower bound, not measured peak process memory."
+  ]
+}

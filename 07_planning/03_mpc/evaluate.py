@@ -51,6 +51,7 @@ def evaluate(output_dir: Path = ROOT / "outputs") -> dict[str, object]:
     plt.close(figure)
     metrics = {
         **config.to_dict(),
+        "dataset_version": "exact-point-world-v1",
         "success": result.success,
         "executed_steps": result.actions.shape[0],
         "replanning_calls": result.actions.shape[0],
