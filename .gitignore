@@ -22,3 +22,4 @@ __pycache__/
 10_video_world_model/03_heterogeneous_simulator/outputs/checkpoint.pt
 11_multimodal/01_multimodal_fusion/outputs/checkpoint.pt
 12_physical_ai/01_action_conditioned_jepa/outputs/checkpoint.pt
+12_physical_ai/02_robot_interface/outputs/checkpoint.pt

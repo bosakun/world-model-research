@@ -1,0 +1,9 @@
+{
+  "observation": "[x,y,vx,vy,goal_x,goal_y] float32",
+  "action": "[vx_command,vy_command] bounded float32",
+  "next_observation": "same as observation",
+  "reward": "negative goal distance",
+  "done": "success or horizon",
+  "source": "0=demonstration; reserve 1=online",
+  "ordering": "episode, step; next_observation[t] == observation[t+1] within episode"
+}

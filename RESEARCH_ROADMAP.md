@@ -92,11 +92,11 @@ Adding a GRU hidden state creates a valid mechanism for retaining trajectory his
 ## 12 Physical AI
 
 - **Completed** — `01_action_conditioned_jepa`: EMA target, action predictor, anti-collapse losses, state probes, and action ablation on noisy robot transitions
-- **Implementing** — `02_robot_interface`: bounded robot adapter, replay, human demonstrations, and offline imitation/online transition boundary
+- **Completed** — `02_robot_interface`: bounded/dead-man/workspace safety adapter, aligned demonstration replay, offline imitation, and simulator-only closed-loop evaluation
 
 ## 90 Evaluation
 
-- **Not Started** — Unified No Memory / GRU / RSSM / Transformer Memory evaluation
+- **Implementing** — Unified No Memory / GRU / RSSM / Transformer Memory evaluation
 - **Not Started** — One/5/10-step and long-horizon prediction under matched data and seeds
 - **Not Started** — Uncertainty calibration, planning success, parameter/latency/memory accounting
 - **Not Started** — Ablations, multiple seeds, and training stability

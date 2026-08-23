@@ -1,0 +1,10 @@
+{
+  "dataset_version": "safe-mobile-demonstrations-v1",
+  "seed": 283,
+  "episodes": 64,
+  "success_rate": 1.0,
+  "mean_final_distance": 0.05250844250258524,
+  "safety_clip_count": 0,
+  "external_hardware_commands_sent": false,
+  "evaluation_entry_point": "python 12_physical_ai/02_robot_interface/evaluate.py"
+}
