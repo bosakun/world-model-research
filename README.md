@@ -54,6 +54,8 @@ Guarded Action
 
 よりゆっくり、実際のGrid Worldの例からMemoryを学ぶ場合は、まず[03_memory/START_HERE.md](03_memory/START_HERE.md)だけを読んでください。数式や論文を先に読む必要はありません。
 
+学んだ内容を一つの記事として読み返す場合は、[03_memory/ARTICLE.md](03_memory/ARTICLE.md)を読んでください。
+
 1. [`03_memory/01_gru`](03_memory/01_gru/README.md): まず過去を覚えるGRUを作る。
 2. [`03_memory/02_partial_observation`](03_memory/02_partial_observation/README.md): なぜ現在画像だけでは足りないのかを体験する。
 3. [`03_memory/03_rssm`](03_memory/03_rssm/README.md): prior/posteriorとKLを導入する。
