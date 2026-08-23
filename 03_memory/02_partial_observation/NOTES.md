@@ -1,49 +1,28 @@
-# Research Notes: Partial Observation
+# 研究ノート: Partial Observation
 
-Date started: 2026-08-22
+開始日: 2026-08-22
 
-## Initial question
+## 出発点
 
-`01_gru` could carry history, but the whole image already revealed the Goal. The unresolved question was not “can GRU run?” but “does the dataset contain information that only memory can provide?”
+`01_gru`は履歴を持てるが、全画像にGoalが見えていた。問うべきことは「GRUが動くか」ではなく、「datasetにmemoryだけが利用できる情報があるか」だった。
 
-## Key design decision
+## 重要な設計と気づき
 
-The local view alone was not considered enough. The dataset therefore includes paired histories: Goal-right vs Goal-down, same Agent start, same `left,left` action prefix, and exactly equal local observation at `t=2` after both Goals leave view. This makes the missing information a checked property instead of an intuition.
+単にviewを狭めるだけでは不十分なので、Goal-right/Goal-down、同じAgent開始位置、同じ`left,left` prefix、`t=2`で完全に同じ観測というpaired historyを作った。missing informationを直感でなくtest済み性質にした。
 
-## Complete observation vs partial observation
+- unknownはemptyではない。青い外側は観測されていない、暗い中央セルは観測済みの空間である。
+- current frameが同じでも、過去に見たGoalとaction列が異なれば世界の意味は異なる。
+- `true_states`と`full_worlds`は評価に必要だが、model入力へ渡すと答えを漏らす。
+- sequence datasetがなければ、Goalが消える前のcueをGRUへ渡せない。
 
-- Full image: current frame nearly tells the model all relevant positions.
-- Local image: current frame tells the model only a local neighbourhood; a previously seen Goal can disappear.
-- Important nuance: “unknown” is not “empty.” Blue outer cells encode absence of observation, while dark central cells encode observed empty local space.
+## 実装上の問題と結果
 
-## Concrete memory example
+`01_gru`と同時にtestすると、standalone folder同士の`env`/`dataset` module名が衝突した。内部実装を`partial_env.py`、`partial_dataset.py`へ分け、従来名のthin wrapperは残した。
 
-At `t=0`, the green Goal is visible to the right. The Agent moves left twice. At `t=2`, the current local image contains no Goal. A hidden state can potentially preserve the old direction plus actions; a memory-free current-frame model cannot recover an unrendered Goal coordinate from pixels that are identical across two true worlds.
+- `t=2`のalias pairはbitwise一致し、true Goal座標は異なった。
+- 既存Simple/GRUはpartial tensorを受け取れたが、これは性能比較ではない。
+- 記事用の図: `full_world.png`、`partial_observation.png`、`observation_sequence.png`、`aliasing_pair.png`。
 
-## Implementation issue found
+## 次に比較したいこと
 
-Running `01_gru` and `02_partial_observation` tests together initially exposed Python module-name collisions (`env`, `dataset`) because both experiments are standalone folders. `02` now uses internally unique names (`partial_env.py`, `partial_dataset.py`) while retaining thin conventional `env.py` and `dataset.py` exports for readability. `01_gru` was not modified.
-
-## Results
-
-- 13 tests passed: 6 existing GRU tests and 7 new tests.
-- Goal visibility: true at `t=0`, false by `t=2` in the reference sequence.
-- Aliasing: two `t=2` observations are bitwise equal while `true_states[...,2:]` differs.
-- Existing Simple Dynamics and GRU interfaces accept the new `[B,T+1,3,20,20]` observations and one-hot actions.
-- Visual outputs clearly show true full world versus partial local view.
-
-## Article material
-
-- Figure pair: full world and local camera at the same time.
-- Sequence figure: Goal visibly leaves the Agent's information set, not the world.
-- Aliasing figure: identical present input, different hidden truth.
-- Framing: a GRU is not useful merely because it has a hidden state; the environment must make history predictive.
-
-## Guardrails for the next phase
-
-- Do not feed `true_states` or `full_worlds` into either model.
-- Do not call environment validation a GRU performance result.
-- Compare matched models, not an optimized GRU against an untrained Simple model.
-- Preserve the alias pair and add history-shuffle/hidden-reset ablations.
-- Do not implement RSSM or Transformer memory before the controlled comparison.
-
+No Memory vs GRUを同じseed/data/parameter accountingで学習し、hidden Goal accuracy、rollout error、history shuffle、hidden resetを比較する。

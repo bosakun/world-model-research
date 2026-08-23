@@ -1,76 +1,64 @@
-# GRU Latent Dynamics on a Fully Observable Grid World
+# 完全観測Grid WorldにおけるGRU潜在ダイナミクス
 
-Status: completed on 2026-08-22.
+状態: 完了（2026-08-22）。
 
-## Purpose
+## 目的
 
-Introduce a recurrent hidden state into action-conditioned latent dynamics and verify one-step prediction, hidden-state propagation, and autoregressive multi-step rollout in an isolated PyTorch experiment.
+action-conditioned latent dynamicsへ再帰的hidden stateを導入し、one-step予測、hidden stateの伝播、autoregressiveなmulti-step rolloutが正しく動くことを、独立したPyTorch実験として確認する。
 
-## Hypothesis
+## 問題と仮説
 
-GRU dynamics can carry information from earlier latent/action pairs in `h_t`. However, because this environment is deterministic and fully observable, the current observation is already a Markov state. A trained GRU is therefore expected to work, but memory is not expected to have a principled advantage over a matched memory-free model until partial observability creates state aliasing.
-
-## Problem
-
-A memory-free transition predicts only from the present:
+memoryなしの遷移は現在だけから未来を予測する。
 
 ```text
 (z_t, a_t) -> predicted z_{t+1}
 ```
 
-When two histories produce the same current observation but imply different hidden physical states, this mapping is ambiguous. A recurrent state allows the transition to condition on a learned summary of history.
+同じ現在観測でも、過去によって本当の状態や必要な予測が異なるなら、この写像は曖昧になる。GRUは履歴を`h_t`へ圧縮し、予測を履歴にも条件付けられるようにする。
 
-## Previous Model
+ただし本実験のGrid Worldは決定論的かつ完全観測であり、現在画像はほぼMarkov stateである。そのためGRUが動くことは確認できても、memoryが本当に必要・有利だとはまだ示せない。この因果的な検証は`02_partial_observation`以降で行う。
 
-The audit found no previous implementation in this checkout. `baseline.py` therefore preserves the requested Simple Dynamics interface as a new, memory-free reference; it is not falsely labeled as recovered prior work. Likewise, no existing latent dimension could be reused, so this experiment explicitly chooses `latent_dim=16`.
+## 以前のモデル
 
-## Architecture
+監査時、このcheckoutには既存実装が存在しなかった。そのため`baseline.py::SimpleDynamics`をmemoryなしの参照として新規作成した。復元された既存コードと誤って扱わない。既存latent dimensionもなかったため、ここでは`latent_dim=16`を実験上の選択として明記する。
+
+## アーキテクチャ
 
 ```text
 observation sequence [B,T+1,3,20,20]
-             |
-       shared CNN Encoder
-             |
-       z_0 ... z_T [B,T+1,16]
-             |
- z_t [16] + one-hot a_t [4] + h_t [64]
-             |
-       GRUCell(20 -> 64)
-             |
-          h_{t+1} [64]
-             |
-       MLP prediction head
-             |
-    predicted z_{t+1} [16]
-             |
-       shared MLP Decoder
-             |
- predicted observation [3,20,20]
+       -> CNN Encoder -> z_0 ... z_T [B,T+1,16]
+
+z_t [16] + one-hot action a_t [4] + h_t [64]
+       -> GRUCell(20 -> 64)
+       -> h_{t+1} [64]
+       -> prediction MLP
+       -> predicted z_{t+1} [16]
+       -> shared Decoder
+       -> predicted observation [3,20,20]
 ```
 
-Training uses teacher forcing: each recurrent step receives encoded ground-truth `z_t`. Evaluation rollout is autoregressive: after the seed `z_0`, each predicted latent becomes the next input while `h_t` is carried forward.
+学習ではteacher forcingを使い、各stepへ正解画像からencodeした`z_t`を渡す。評価rolloutでは`z_0`だけを正解から得て、以後は予測latentを次入力に戻しながら`h_t`を持ち運ぶ。
 
-This is a deterministic recurrent latent model. It has no stochastic state, prior, posterior, KL divergence, reward model, actor, value model, or planner, and is not an RSSM/PlaNet/Dreamer reproduction.
+これは決定論的recurrent latent modelである。stochastic state、prior/posterior、KL、reward/value、actor、plannerは含まない。RSSM、PlaNet、Dreamerの再現ではない。
 
 ## Tensor Shapes
 
-Let `B=batch`, `T=8`, `C=3`, `H=W=20`, `D_z=16`, `D_a=4`, and `D_h=64`.
+`B`: batch、`T=8`、`C=3`、`H=W=20`、`D_z=16`、`D_a=4`、`D_h=64`。
 
-| Tensor | Shape | Meaning |
-|---|---|---|
-| observations | `[B,T+1,C,H,W]` | full RGB Grid World sequence |
-| action indices | `[B,T]` | integers 0..3 |
-| one-hot actions | `[B,T,D_a]` | GRU conditioning |
-| encoded latents | `[B,T+1,D_z]` | current visual representations |
-| GRU input at step t | `[B,D_z+D_a] = [B,20]` | concatenated latent/action |
-| initial/final hidden | `[B,D_h] = [B,64]` | recurrent memory |
-| hidden sequence | `[B,T,D_h]` | post-update hidden states |
-| predicted next latents | `[B,T,D_z]` | one-step or rollout predictions |
-| decoded predictions | `[B,T,C,H,W]` | predicted future observations |
+| Tensor | Shape | 意味 |
+|---|---:|---|
+| observations | `[B,T+1,3,20,20]` | 完全観測RGB系列 |
+| actions | `[B,T,4]` | one-hot action |
+| encoded latents | `[B,T+1,16]` | 現在画像の表現`z_t` |
+| GRU input | `[B,20]` | `[z_t;a_t]` |
+| hidden | `[B,64]` | 履歴を圧縮する`h_t` |
+| hidden sequence | `[B,T,64]` | 更新後hidden列 |
+| predicted latents | `[B,T,16]` | 次時刻latent予測 |
+| decoded predictions | `[B,T,3,20,20]` | 未来画像予測 |
 
-## Mathematics
+## 数式
 
-For `x_t = [z_t; a_t]`, PyTorch `GRUCell` computes:
+`x_t=[z_t;a_t]`として、実装しているPyTorch `GRUCell`の更新は次である。
 
 ```text
 r_t = sigmoid(W_ir x_t + b_ir + W_hr h_t + b_hr)
@@ -80,188 +68,106 @@ h_{t+1} = (1-u_t) * n_t + u_t * h_t
 predicted z_{t+1} = g_theta(h_{t+1})
 ```
 
-`r_t` controls how much past state contributes to the candidate; `u_t` interpolates between the candidate and existing memory. Gate symbols vary across papers; these equations match the implemented PyTorch convention.
+`r_t`はcandidateを作る際に過去をどれだけ使うか、`u_t`はcandidateと既存memoryのどちらを残すかを学習する。記号名は論文によって異なるが、ここではPyTorchの規約に合わせる。
 
-The total training loss is:
+学習目的は以下である。
 
 ```text
-L = lambda_rec * mean((Decoder(Encoder(o_t)) - o_t)^2)
-  + lambda_pos * CE(cell_logits(Decoder(Encoder(o_t))), agent_cell_t)
-  + lambda_dyn * mean((predicted z_{t+1} - stopgrad(Encoder(o_{t+1})))^2)
+L = L_rec + 0.2 L_pos + 2 L_dyn
+L_rec = MSE(Decoder(Encoder(o_t)), o_t)
+L_pos = CE(cell_logits(Decoder(Encoder(o_t))), agent_cell_t)
+L_dyn = MSE(predicted z_{t+1}, stopgrad(Encoder(o_{t+1})))
 ```
 
-with `lambda_rec=1`, `lambda_pos=0.2`, and `lambda_dyn=2`. `cell_logits` pools decoded red-vs-other color evidence into the 25 mutually exclusive grid cells. This auxiliary term was added after aggregate MSE ignored the small moving agent and target-only pixel weighting encouraged red false positives everywhere. The stopped dynamics target prevents dynamics loss from training the encoder to collapse toward easy moving targets. Reconstruction keeps the latent grounded in the full image, and `tanh` bounds the jointly learned latent. Position supervision uses simulator-known colors/labels and is an independent educational modification, not the likelihood/ELBO objective of PlaNet or Dreamer.
+小さなAgentはpixel MSEだけでは無視され得るため、25セルのagent-position cross entropyを補助lossとして追加した。`stopgrad`はdynamics lossがEncoderを容易なtargetへ崩壊させるのを抑える。これはこの教育用rendererに対する独自変更であり、PlaNet/DreamerのELBOではない。
 
-## Code Mapping
+## コード対応
 
-| Concept/equation | Code |
+| 概念 | 実装 |
 |---|---|
-| visual state `z_t = Encoder(o_t)` | `model.py::VisualEncoder` |
-| reconstruction `Decoder(z_t)` | `model.py::VisualDecoder` |
-| `x_t=[z_t;a_t]`, gates, hidden update | `model.py::GRUDynamics.step` / `torch.nn.GRUCell` |
-| sequence teacher forcing | `model.py::GRUDynamics.forward` |
-| autoregressive imagination path | `model.py::GRUDynamics.rollout` |
-| `predicted z_{t+1}=g(h_{t+1})` | `model.py::GRUDynamics.prediction_head` |
-| reconstruction/dynamics losses | `losses.py::world_model_loss` |
-| memory-free reference | `baseline.py::SimpleDynamics` |
-| deterministic transitions/rendering | `env.py::FullyObservableGridWorld` |
-| fixed trajectory tensors | `dataset.py::GridSequenceDataset` |
+| `z_t=Encoder(o_t)` | `model.py::VisualEncoder` |
+| `Decoder(z_t)` | `model.py::VisualDecoder` |
+| GRU update | `model.py::GRUDynamics.step` / `torch.nn.GRUCell` |
+| teacher-forced sequence | `model.py::GRUDynamics.forward` |
+| autoregressive rollout | `model.py::GRUDynamics.rollout` |
+| prediction head | `model.py::GRUDynamics.prediction_head` |
+| 各loss | `losses.py::world_model_loss` |
+| memoryなし参照 | `baseline.py::SimpleDynamics` |
+| 環境・系列 | `env.py`, `dataset.py` |
 
-## Training
-
-From the repository root:
+## 学習と評価
 
 ```bash
-uv sync
-uv run pytest
+uv run pytest -q 03_memory/01_gru/tests
 uv run python 03_memory/01_gru/train.py
 uv run python 03_memory/01_gru/evaluate.py
 ```
 
-The default smoke-scale run uses 256 training sequences, 64 validation sequences, length 8, batch 32, 40 epochs, Adam with learning rate `3e-3`, and seed 7. The autoencoder and GRU dynamics are jointly optimized.
+既定smoke runはtrain/validation `256/64`系列、長さ8、batch 32、40 epoch、Adam、learning rate `3e-3`、seed 7である。Encoder、Decoder、GRUをjoint trainingする。
 
-## Losses
+評価はteacher-forced one-step latent/pixel error、agent-cell accuracy、8-step autoregressive rollout、horizon別error、shape、finite value、gradient、parameter数、推論時間を確認する。Simple Dynamicsはinterface確認に残しているが、まだ公平な性能比較として訓練していない。
 
-- Reconstruction MSE teaches Encoder/Decoder to preserve the full visual frame.
-- Agent-cell cross-entropy teaches the decoded representation which single cell contains the small moving agent; removing it allowed low-MSE background shortcuts in this imbalanced image.
-- Latent dynamics MSE teaches GRU + prediction head to map history, current latent, and action to the next encoded observation. Removing it leaves no future-prediction learning signal.
-- There is deliberately no KL loss: there is no stochastic latent distribution, prior, or posterior in this experiment.
+## 結果
 
-## Evaluation
+最終40 epoch smoke runの結果:
 
-- Held-out one-step latent MSE under teacher-forced hidden-state evolution.
-- Held-out one-step decoded pixel MSE and agent-cell accuracy.
-- Eight-step autoregressive rollout pixel MSE overall and by horizon.
-- Visual comparison of truth and decoded rollout.
-- Hidden shape, finite values, gradient flow, dataset consistency, environment boundaries, parameter count, and inference time.
-
-The retained Simple Dynamics baseline is interface- and parameter-tested but is not yet trained as a performance comparator. A fair performance claim requires matched optimization and preferably the partial-observation experiment; a random-baseline number would be misleading.
-
-## Results
-
-The final seeded 40-epoch smoke run completed successfully:
-
-| Metric | Result |
+| 指標 | 結果 |
 |---|---:|
 | tests | 6 passed |
-| trainable parameters (whole model) | 343,336 |
-| GRU dynamics parameters | 21,712 |
-| Simple Dynamics parameters | 6,544 |
-| initial train total loss | 0.803508 |
-| final train total loss | 0.252070 |
-| final validation total loss | 0.278304 |
+| 全parameter数 | 343,336 |
+| GRU dynamics parameter数 | 21,712 |
+| initial/final train loss | 0.803508 / 0.252070 |
+| final validation loss | 0.278304 |
 | validation reconstruction MSE | 0.003758 |
-| validation position cross-entropy | 0.005982 |
 | held-out one-step latent MSE | 0.141365 |
-| held-out one-step pixel MSE | 0.005980 |
-| held-out one-step agent-cell accuracy | 83.59% |
+| one-step agent-cell accuracy | 83.59% |
 | 8-step rollout mean pixel MSE | 0.008376 |
 | 8-step rollout mean agent-cell accuracy | 55.86% |
-| mean GRU rollout time per sequence | 6.98 microseconds |
+| GRU rollout time / sequence | 6.98 microseconds |
 
-Rollout position accuracy by horizon was `75.0%, 76.6%, 64.1%, 54.7%, 51.6%, 50.0%, 37.5%, 37.5%`. Pixel MSE rose overall from `0.00633` at horizon 1 to `0.00989` at horizon 8 (not strictly monotonically for every sample/horizon). This confirms both a functioning autoregressive path and compounding long-horizon error.
+horizon別position accuracyは`75.0, 76.6, 64.1, 54.7, 51.6, 50.0, 37.5, 37.5%`。one-stepでは動いても長期rolloutで誤差が蓄積することを確認した。
 
-The output figures and machine-readable metrics are in `outputs/`. Results are from one seed and do not support a GRU-vs-MLP superiority claim.
+## 失敗例・知見
 
-## Failure Cases
+- 初期のplain MSEはAgentを落としても低errorになった。
+- active pixel重み付けではchance-levelのposition accuracy、Goalだけの高重みでは「全セルを赤くする」shortcutが出た。
+- 小さなtransposed-convolution decoderでは位置分類が学べず、MLP decoderへ変更した。
+- 最終モデルもhorizon 7–8でposition accuracy 37.5%まで低下した。
 
-Observed failures:
+pixel MSEだけでは意味的な状態予測を保証しない。one-step成功もstable imaginationを意味しない。そして完全観測の結果はGRU実装の妥当性を示すだけで、memoryの必要性は示さない。
 
-- Initial plain-MSE run reached low aggregate error while omitting the small agent entirely.
-- Equal active-pixel weighting still produced chance-level cell accuracy (~3.9%).
-- Target-only high red weighting produced a red-everywhere false-positive shortcut.
-- A small transposed-convolution Decoder kept position cross-entropy near random; the final MLP Decoder learned the global latent-to-cell mapping.
-- Final autoregressive accuracy declined from 75.0% at horizon 1 to 37.5% at horizons 7–8, and decoded images accumulated color/position artifacts.
+## 比較・限界・次の問い
 
-These failures show why pixel MSE and one-step metrics must be paired with semantic state accuracy and rollout visualization.
-
-## Comparison
-
-| Property | Simple Dynamics | This GRU Dynamics |
+| 性質 | Simple Dynamics | GRU Dynamics |
 |---|---|---|
-| Transition input | `z_t, a_t` | `z_t, a_t, h_t` |
-| History | none | compressed into `h_t` |
-| State carried during rollout | predicted `z_t` | predicted `z_t` and `h_t` |
-| Necessary in this full-observation task | likely sufficient | likely redundant |
-| Ambiguous partial observation | cannot disambiguate | potentially can disambiguate |
+| 入力 | `z_t,a_t` | `z_t,a_t,h_t` |
+| 履歴 | なし | `h_t`へ圧縮 |
+| rolloutで持つstate | `z_t` | `z_t`と`h_t` |
+| 完全観測での必要性 | 概ね十分 | 概ね冗長 |
 
-No empirical superiority claim is made before the matched comparison phase.
+Candidate: **Undecided**。固定長の履歴summaryと明示的rollout stateは利点だが、逐次計算、忘却、追加parameter、uncertainty不在という弱点がある。次は`02_partial_observation`で現在frameだけでは区別できない状態を作り、その後にmatched comparisonを行う。
 
-## Findings
-
-- `z_t` and `h_t` are operationally distinct and their sequence/rollout shapes were verified: `[B,T,16]` predictions and `[B,T,64]` hidden states.
-- Teacher-forced one-step position prediction succeeded at 83.6%, while autoregressive performance fell with horizon. One-step success did not guarantee long-rollout stability.
-- Aggregate pixel MSE twice concealed semantically invalid representations; the agent-cell metric caught both failures.
-- The final position auxiliary loss and MLP Decoder are educational modifications required by this tiny imbalanced renderer, not GRU or World Models paper mechanisms.
-- Full observability means these results validate recurrent implementation but still do not demonstrate that memory was necessary.
-
-## Limitations
-
-- Fully observable deterministic dynamics do not test the central memory hypothesis.
-- Small synthetic images and short sequences are a mechanism test, not a research-scale benchmark.
-- Deterministic MSE prediction cannot express multiple plausible futures.
-- Joint training does not include reward/value/policy/planning.
-- Only one seed is used for the smoke run.
-- The baseline is retained but controlled training comparison is deferred.
-
-## Final Model Candidate
-
-```text
-Candidate:
-Undecided
-
-Reason:
-The mechanism and rollout path can be validated here, but usefulness cannot be judged in a fully observable Markov environment without a matched baseline and a partial-observation task.
-
-Advantages:
-- fixed-size differentiable history summary
-- explicit recurrent state carried through rollout
-- low per-step cost relative to full attention over history
-
-Disadvantages:
-- sequential computation
-- finite hidden bottleneck and possible forgetting
-- extra state/reset semantics and parameters
-- no uncertainty representation
-
-Conflicts with other methods:
-- a future Transformer may replace rather than complement GRU memory
-- RSSM will combine recurrent deterministic state with stochastic state, changing objectives and state semantics
-```
-
-## Next Questions
-
-- Does the trained model actually use `h_t`, or can current `z_t` explain every transition?
-- Under identical training, does GRU beat Simple Dynamics on complete observations?
-- What partial-observation construction yields identical frames with history-dependent next states?
-- How long can useful information survive in `h_t`?
-- Should the decoder reconstruct from `z_t`, `h_t`, or their combination in later models?
-- When do deterministic dynamics require stochastic prior/posterior states?
-
-The next experiment should be `03_memory/02_partial_observation` because it creates the missing causal test: hide enough state that current observation alone is ambiguous, then compare models under matched data and optimization.
-
-## References
+## 参考文献
 
 ### Learning Phrase Representations using RNN Encoder–Decoder for Statistical Machine Translation
 
-Authors: Kyunghyun Cho, Bart van Merriënboer, Çağlar Gülçehre, Dzmitry Bahdanau, Fethi Bougares, Holger Schwenk, Yoshua Bengio. Year: 2014. Paper: https://aclanthology.org/D14-1179/; DOI: https://doi.org/10.3115/v1/D14-1179.
-
-Used for: the gated recurrent unit family and interpretation of reset/update gating. Implementation: `model.py::GRUDynamics` uses `torch.nn.GRUCell`, whose exact gate equations are documented above. The original paper addressed machine translation; the action-conditioned latent transition here is an independent educational adaptation.
+- Authors: Kyunghyun Cho et al.
+- Year: 2014
+- Paper: https://aclanthology.org/D14-1179/ / https://doi.org/10.3115/v1/D14-1179
+- 利用箇所: GRUのgating。`model.py::GRUDynamics`は`torch.nn.GRUCell`を使う。
+- 差分: 機械翻訳用の原論文に対するaction-conditioned latent transitionへの教育用適用。
 
 ### World Models / Recurrent World Models Facilitate Policy Evolution
 
-Authors: David Ha, Jürgen Schmidhuber. Year: 2018. Papers: https://arxiv.org/abs/1803.10122 and https://arxiv.org/abs/1809.01999.
-
-Used for: World Model context in which a visual representation is followed by a recurrent temporal model and rollouts. Implementation relation: `model.py` and `evaluate.py`. Difference: the paper's temporal model is an MDN-RNN over VAE latents; this experiment uses deterministic GRU latent MSE, no mixture density output, no VAE, and no controller.
+- Authors: David Ha, Jürgen Schmidhuber
+- Year: 2018
+- Paper: https://arxiv.org/abs/1803.10122 / https://arxiv.org/abs/1809.01999
+- 利用箇所: 視覚表現の後にrecurrent temporal modelを置く文脈。
+- 差分: MDN-RNN、VAE、controllerは実装していない。
 
 ### Learning Latent Dynamics for Planning from Pixels (PlaNet)
 
-Authors: Danijar Hafner, Timothy Lillicrap, Ian Fischer, Ruben Villegas, David Ha, Honglak Lee, James Davidson. Year: 2018 (published at ICML 2019). Paper: https://arxiv.org/abs/1811.04551.
-
-Used for: conceptual distinction between deterministic recurrent state and learned latent dynamics. Future implementation target: `03_memory/03_rssm/`. Difference: this code has no RSSM stochastic state, prior/posterior, variational objective, latent overshooting, reward prediction, or planning. It is not PlaNet.
-
-### Dream to Control: Learning Behaviors by Latent Imagination
-
-Authors: Danijar Hafner, Timothy Lillicrap, Jimmy Ba, Mohammad Norouzi. Year: 2019. Paper: https://arxiv.org/abs/1912.01603.
-
-Used for: context for recurrent state-space rollouts and the later progression from a learned world model to latent imagination. Difference: this implementation only trains deterministic observation dynamics; it has no stochastic RSSM state, reward/value models, actor, or imagination-based policy optimization and is not Dreamer.
+- Authors: Danijar Hafner et al.
+- Year: 2018 / ICML 2019
+- Paper: https://arxiv.org/abs/1811.04551
+- 利用箇所: 後続RSSMとの概念的な比較。ここはprior/posterior/KLを含まない。
