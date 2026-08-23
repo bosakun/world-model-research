@@ -2,6 +2,14 @@
 
 状態: 完了（2026-08-23）。このリポジトリのために設計した比較実験であり、論文benchmarkそのものではない。
 
+## 先に読むところ
+
+このページで一番大切なのは表の小数ではない。次の問いである。
+
+> 同じ現在画像なのに、過去が違うと正しい答えも違うとき、modelは過去を使えているか？
+
+No Memoryが50%、memoryを外したGRU/RSSM/Transformerも50%へ落ちたことをまず確認する。これが「memoryが実際に使われた」証拠である。parameter数やlatencyは、その後で読む。
+
 ## 目的
 
 No Memory、GRU、continuous RSSM、causal Transformerを、同じpartial-observation dataset、loss、context、rollout、seed、評価方法で比較する。以前の個別実験はEncoderや学習stepが違い、その数値を並べても公平ではなかった。

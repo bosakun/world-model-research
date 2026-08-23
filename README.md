@@ -52,6 +52,8 @@ Guarded Action
 
 最初はすべてを理解する必要はありません。次の順で読むと、部品が必要になる理由を段階的に追えます。
 
+よりゆっくり、実際のGrid Worldの例から進める場合は、まず[START_HERE.md](START_HERE.md)だけを読んでください。数式や論文を先に読む必要はありません。
+
 1. [`03_memory/01_gru`](03_memory/01_gru/README.md): まず過去を覚えるGRUを作る。
 2. [`03_memory/02_partial_observation`](03_memory/02_partial_observation/README.md): なぜ現在画像だけでは足りないのかを体験する。
 3. [`03_memory/03_rssm`](03_memory/03_rssm/README.md): prior/posteriorとKLを導入する。

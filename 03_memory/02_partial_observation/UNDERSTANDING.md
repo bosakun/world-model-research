@@ -1,73 +1,106 @@
-# Partial ObservabilityとMemoryを理解する
+# Lesson 2: なぜ過去を覚えないといけないのか
 
-## 解決する問題
+Lesson 1ではGRUというメモ帳を作りました。しかし、今の画像だけで答えが分かるなら、メモ帳は必要ありません。このLessonでは、**過去を覚えないと答えられない問題**を作ります。
 
-GRUを追加しただけでは、memoryに使うべき情報がdataset内にあるとは限らない。完全観測Grid WorldではframeにGoalが写る。本実験ではGoalをlocal cameraの外へ隠し、現在画像が同じでも本当の世界が異なる状態を作る。
+## 目で見て確かめる
 
-## stateとobservation
+まず`outputs/aliasing_pair.png`を開いてください。
 
-- true state `s_t`: simulatorが持つ完全情報。Agentのrow/colとGoalのrow/col。
-- observation `o_t`: Agent/modelが受け取る3x3 agent-centred画像。視界外はunknown。
-
-評価では`true_states`を見てよいが、model入力に渡してはいけない。そうするとPOMDPの問題設定が消える。
-
-## Before / After
+二つの世界があります。
 
 ```text
-完全観測: full image -> z_t -> f(z_t,a_t)
-部分観測: true state -> local observation o_t -> z_t
-          past z/action -> h_t -> GRU prediction
+世界A: 最初にGoalが右に見えた
+世界B: 最初にGoalが下に見えた
 ```
 
-`t=2`ではright Goalとdown Goalの局所画像が同じになる。現在画像の意味は履歴に依存する。
-
-## POMDPの直感
-
-POMDPでは世界の本当のstateは隠れており、action後に得られるobservationだけで判断する。Bayesian beliefなら候補世界の確率を明示する。GRUの`h_t`は確率分布を明示しないが、「前にGoalが右にあった」「その後leftを2回した」といった予測に役立つ証拠を保持できる。
+Agentはどちらでも同じようにleftを2回押します。するとGoalは視界の外へ消えます。
 
 ```text
-s_t^A != s_t^B でも o_t^A = o_t^B は起こり得る。
+t=0: Goalが見える
+t=1: Agentがleftへ動く
+t=2: Goalが見えない
 ```
 
-## データフローと数式
-
-1. simulatorが`(agent_row,agent_col,goal_row,goal_col)`を保持する。
-2. actionでAgent位置だけを更新する。
-3. `O(s_t)`がAgent中心3x3を固定20x20 canvas中央へ描く。
-4. Goalがlocal range外なら描かない。青は未観測、黒は観測済みempty。
-5. Encoderが`o_t -> z_t`、GRUが`[z_t;a_t],h_t -> h_{t+1}`を計算する。
+`t=2`の画像はAとBで完全に同じです。しかし、本当のGoalの位置は違います。
 
 ```text
-p_{t+1}=clip(p_t+delta(a_t)),  g_{t+1}=g_t
-o_t=O(s_t)
-h_{t+1}=GRUCell([z_t;a_t],h_t)
+画像A == 画像B
+でも
+本当の世界A != 本当の世界B
 ```
 
-`T`個のactionは状態を`T`回遷移させるため、observation/stateは`T+1`個ある。
+この状態をaliasと呼びます。名前を覚えるより、「同じ写真なのに正しい答えが違う」と考えてください。
 
-## 重要部品を外すと
+## stateとobservationの違い
 
-| 外すもの | 結果 |
-|---|---|
-| local observation | Goalが現在frameへ現れ、memory問題が弱くなる |
-| paired alias | memoryが必要なケースが偶然入らない可能性がある |
-| true-state metadata | 同一観測が異なる世界を隠したと証明できない |
-| action history | 記憶したGoalとの相対関係を更新できない |
-| GRU hidden carry | recurrent modelがmemoryなし処理になる |
-| sequence構造 | 過去のcueを利用できない |
+ここで二つの言葉を分けます。
 
-## 説明できるようになる確認項目
+| 言葉 | 意味 | 誰が知っているか |
+|---|---|---|
+| true state | AgentとGoalの本当の座標すべて | 環境（simulator） |
+| observation | Agentが今見られる3x3の画像 | Agent / model |
 
-- この環境の`state`と`observation`の違いを具体的に言えるか。
-- `t=2`で同じ画像でもGoalが異なる理由を説明できるか。
-- 青unknownと空セルの違いは何か。
-- transition単位でなくsequence datasetが必要な理由は何か。
-- `h_t`へ何を保持してほしいのか。
-- GRU互換性テストがGRUの優位性を証明しない理由は何か。
+環境はGoalが右か下かを知っています。しかしmodelには局所画像しか渡しません。`true_states`は「あとで答え合わせをするため」に持っているだけで、modelへ入力してはいけません。
 
-## 次の問い
+## なぜ現在画像だけでは足りないか
 
-- 学習済みGRUは最初に見たGoal方向を実際に保持するか。
-- matched Simple Dynamicsよりhidden-Goal predictionで勝つか。
-- history shuffleや`h_t` resetで優位性は消えるか。
-- moving Goal、複数Goal、observation noiseが入るとdeterministic GRUで足りるか。
+memoryなしmodelが受け取るものは、今の画像とactionだけです。
+
+```text
+同じ画像 + 同じaction -> 同じ予測
+```
+
+しかし世界AとBは、同じ現在画像でも本当は違います。memoryなしmodelは二つの答えを区別できないので、どちらかを当ててももう一方を外します。均等な二択なら最高でも50%です。
+
+GRUなら、`t=0`で見えたGoalの方向を`h_t`に残せます。
+
+```text
+最初に右Goalを見た -> h_tに右の手掛かり
+最初に下Goalを見た -> h_tに下の手掛かり
+```
+
+`t=2`の画像が同じでも、`h_t`が違えば違う行動や予測を選べます。
+
+## POMDPは何か
+
+POMDPは「世界の全情報を見られない問題」の名前です。難しい数式を先に覚えなくて大丈夫です。
+
+```text
+本当の世界 -> カメラ -> 見える一部分
+```
+
+カメラが見せない場所には情報があっても、Agentには分かりません。だから複数の時刻の観測とactionを合わせて考える必要があります。
+
+## なぜsequence datasetが必要か
+
+`t=2`の画像だけを一枚渡しても、Goalが以前どこにあったかは分かりません。
+
+GRUへ渡すのは一枚ではなく、時系列です。
+
+```text
+o_0, a_0, o_1, a_1, o_2
+```
+
+この列があって初めて、GRUは「前に見えたGoal」と「その後に押したaction」をメモできます。
+
+## コードを読む順番
+
+```text
+partial_env.py      : true stateと局所カメラ
+partial_dataset.py  : paired aliasの系列を作る
+visualize.py        : 同じ画像・違うGoalを図にする
+model_adapters.py   : 既存GRU/Simple Dynamicsへつなぐ
+tests/              : Goalが本当に漏れていないかを確認する
+```
+
+まず`partial_env.py`で「3x3の外は青いunknownになる」ことだけ確認してください。次に`partial_dataset.py`で、right Goalとdown Goalのpairを作っている部分を探します。
+
+## このLessonでできるようになること
+
+- stateとobservationの違いを言える。
+- 同じ現在画像でも過去によって本当の世界が違う例を説明できる。
+- 画像が一枚ではなくsequenceで必要な理由を言える。
+- `true_states`をmodel入力へ渡すと何が悪いかを説明できる。
+- まだGRUが有利だと証明できていない理由を言える。
+
+次のLessonでは、過去を覚えるだけでなく、**未来の画像を見る前にどう予測するか**を考えます。

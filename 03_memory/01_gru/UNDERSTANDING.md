@@ -1,107 +1,138 @@
-# GRU Memoryを理解する
+# Lesson 1: 画像とactionから次の画像を予測する
 
-## 何を解決するか
+このページでは、GRUの式を覚える必要はありません。まず「世界モデルが何をするプログラムか」を、5x5のGrid Worldで理解します。
 
-feed-forward dynamicsは今渡された変数だけを見る。観測が不完全なら、同じ`z_t`でも別の本当の状態に対応し、異なる未来を予測すべきことがある。GRUは過去の`(z,a)`を反映した`h_t`を持たせ、履歴に依存する予測を可能にする。
+## まず、何を当てたいのか
 
-ただし現在の環境は完全観測なので、これは「機構の動作確認」であって「memoryの効果の証明」ではない。
-
-## Before / After
+Agentがいるマス目の画像があります。Agentが右へ動くactionを選んだら、次の画像ではAgentが1マス右にいるはずです。
 
 ```text
-Before: predicted z_{t+1} = f(z_t, a_t)
-
-After:  h_{t+1} = GRUCell([z_t;a_t], h_t)
-        predicted z_{t+1} = g(h_{t+1})
+今の画像       action       次の画像
+[Agent . Goal] + 右へ動く -> [. Agent Goal]
 ```
 
-`z_t`は現在画像だけのEncoder出力`[B,16]`、`h_t`は以前のupdateに依存する履歴state`[B,64]`である。同じ`z_t`でも異なる`h_t`になり得る。
+この「今の情報とactionから次の情報を当てる」役がWorld Modelです。
 
-## データフロー
-
-1. 正解画像を`z_0...z_T`へencodeする。
-2. `[z_t;a_t]`を作り、`h_t`とともにGRUCellへ渡す。
-3. 更新直後の`h_{t+1}`から`predicted z_{t+1}`を得る。
-4. trainingでは正解`z_t`を次stepへ渡す（teacher forcing）。
-5. rolloutでは予測`z_{t+1}`を次stepへ戻し、hiddenも持ち運ぶ。
-6. episode境界ではhiddenをzeroへresetする。別episodeへ持ち越すと情報leakになる。
-
-## 数式
-
-### 入力
+この実験では、画像を直接次の画像へ変換するのではなく、いったん小さな数字の並びへ変えてから予測します。
 
 ```text
-x_t = [z_t;a_t] in R^20
+画像 -> 小さな数字の並び -> 次の数字の並び -> 次の画像
 ```
 
-`a_t`をone-hotにすることで、left/rightなどに存在しない大小関係を与えない。
+## `z`とは何か
 
-### GRU gates
+`z_t`は、時刻`t`の画像をEncoderが要約した数字の並びです。shapeは`[B,16]`です。
+
+「16個の数字のどれがAgent位置か」を人間が決めているわけではありません。学習を通して、次の画像を作るのに役立つ情報を16個の数字へ詰めようとします。
+
+最初は、次のように考えれば十分です。
 
 ```text
-r_t = sigmoid(W_ir x_t + b_ir + W_hr h_t + b_hr)
-u_t = sigmoid(W_iu x_t + b_iu + W_hu h_t + b_hu)
-n_t = tanh(W_in x_t + b_in + r_t * (W_hn h_t + b_hn))
-h_{t+1} = (1-u_t) * n_t + u_t * h_t
+画像 o_t を短くメモしたものが z_t
 ```
 
-- `r_t`: candidateを作るとき、過去の各成分をどれだけ使うか。
-- `u_t`: 古いhiddenを残す比率。1に近い成分ほど保持される。
-- `n_t`: 現在入力と選択した過去から作る候補memory。
+## ここでGRUを入れる理由
 
-gateにより、RNNが毎stepすべてを書き換えて長期情報を失う問題を緩和する。
-
-### 予測とloss
+通常の小さなmodelなら、次のように考えます。
 
 ```text
-predicted z_{t+1} = g_theta(h_{t+1})
-L = L_rec + 0.2 L_pos + 2 L_dyn
+今のメモ z_t + 今のaction a_t -> 次のメモ z_{t+1}
 ```
 
-- `L_rec`: latentが画像を保持するようにする。なければconstant latent collapseが可能。
-- `L_pos`: 小さいAgent位置を25分類で守る。pixel MSEのbackground shortcutを検出する。
-- `L_dyn`: 次時刻latentを予測する。targetをdetachし、Encoderとdynamicsが簡単な表現へ共倒れするのを抑える。
+GRUでは、さらに過去のメモ`h_t`を持ちます。
 
-## コード対応
+```text
+今のメモ z_t + 今のaction a_t + 過去のメモ h_t
+    -> GRU
+    -> 新しい過去のメモ h_{t+1}
+    -> 次の画像のメモ z_hat_{t+1}
+```
 
-| 知りたいこと | ファイル |
+`h_t`は「前までに何があったか」を小さなメモ帳にまとめたものです。shapeは`[B,64]`です。
+
+| 名前 | たとえ | この実験での役割 |
+|---|---|---|
+| `z_t` | いま見ている写真のメモ | 現在の画像の要約 |
+| `a_t` | いま押したボタン | up/down/left/right |
+| `h_t` | これまでの出来事メモ | 過去の画像とactionの要約 |
+
+## GRUはどうやって覚えるのか
+
+GRUは毎stepで、次の二つを自動的に決めます。
+
+1. 古いメモのどこを残すか。
+2. 今回の画像とactionで、何を書き足すか。
+
+これを決めるスイッチがgateです。gateの数式は後で読めば十分です。今は、次の意味だけ理解してください。
+
+```text
+大事な過去なら残す
+新しい情報が大事なら書き換える
+```
+
+## 学習中と評価中は違う
+
+ここは非常に大切です。
+
+### 学習中: teacher forcing
+
+学習中は、毎stepで本物の画像を使えます。つまり、次のstepに入る`z_t`は正解画像から作れます。
+
+```text
+正解画像 -> z_t -> 予測 -> 次の正解画像と比べる
+```
+
+これは答えを見ながら練習問題を解くような状態です。
+
+### 評価中: rollout
+
+未来を想像するとき、未来の正解画像は見られません。そこでmodel自身が出した`z_hat`を、次の入力に戻します。
+
+```text
+z_0 -> z_hat_1 -> z_hat_2 -> z_hat_3 -> ...
+```
+
+少しの間違いが次の間違いの入力になるため、先へ進むほど予測が崩れやすくなります。これをcompounding errorと呼びます。
+
+## lossは何を教えるか
+
+この実験には三つのlossがあります。
+
+| loss | modelに教えたいこと |
 |---|---|
-| 観測、action、境界処理 | `env.py` |
-| 系列tensor | `dataset.py` |
-| Encoder / Decoder | `model.py::VisualEncoder`, `VisualDecoder` |
-| updateのタイミング | `model.py::GRUDynamics.step` |
-| training sequence | `GRUDynamics.forward` |
-| rollout時のstate更新 | `GRUDynamics.rollout` |
-| lossとdetach | `losses.py` |
-| memoryなし反実仮想 | `baseline.py::SimpleDynamics` |
+| reconstruction loss | `z_t`から今の画像を戻せるようにする |
+| agent position loss | 小さいAgentを背景に埋もれさせず、正しいマスに置く |
+| dynamics loss | `z_t`とactionから次の`z`を予測する |
 
-## 重要部品を外すと
+画像全体のMSEだけでは、背景の大部分が合っていれば低いlossになります。しかしAgentは小さいので、Agentを消してもMSEが小さくなることがあります。そのため「Agentがどのマスにいるか」も別に学ばせ、評価します。
 
-| 外す部品 | 起きること |
-|---|---|
-| hidden / GRU | 履歴は予測へ影響しない。完全観測では差が小さい場合もある |
-| update gate | old stateを保つ経路が弱くなり、長期保持が難しい |
-| reset gate | candidateが不要な過去を選別しにくい |
-| action | 同じ状態で複数の次状態が曖昧になる |
-| reconstruction loss | latent collapseが低loss解になる |
-| dynamics loss | 画像復元しても未来を学ばない |
-| episode reset | 別episodeの情報が漏れる |
-| rollout中のhidden carry | 毎stepone-step modelをresetするのと同じになる |
+## この実験で分かったこと
 
-## 説明できるようになる確認項目
+- GRUを使って、画像とactionから未来を予測する処理は動いた。
+- one-stepではAgent位置をかなり当てられた。
+- rolloutを続けると誤差は大きくなった。
+- ただし世界全体が画像に見えているので、GRUのmemoryが本当に必要だったとは言えない。
 
-- `z_t`と`h_t`の情報源・shape・役割を区別できるか。
-- 観測が`T+1`枚でactionが`T`個なのはなぜか。
-- `h_t`がいつ`h_{t+1}`へ更新されるか。
-- GRUCellの入力と出力は何か。
-- GRUが「記憶する」とは、どの情報がどの経路を通ることか。
-- teacher forcingだけで長期rolloutを評価できない理由は何か。
-- 完全観測Grid Worldでmemoryの効果を結論できない理由は何か。
-- なぜこの実装はPlaNet、RSSM、Dreamerではないのか。
+最後の点が次のLessonへつながります。
 
-## 次に残る問い
+## コードを読む順番
 
-- 観測を数step隠したとき、`h_t`はGoal情報を保持するか。
-- 同程度のparameter数のMLPと比較して、改善はrecurrence由来だと示せるか。
-- scheduled samplingやmulti-step lossはrollout driftを下げるか。
-- hidden利用をloss以外にどう計測するか（history shuffle、probe、gate統計）。
+```text
+env.py       : Agentを動かす世界
+dataset.py   : 画像とactionの系列を作る
+model.py     : Encoder、Decoder、GRU
+losses.py    : 何を正解として学ぶか
+evaluate.py  : 未来を連続で予測する
+```
+
+最初に`model.py`を全部理解しようとしないでください。`GRUDynamics.step`で、入力が`z_t, a_t, h_t`、出力が`h_{t+1}`であることだけ確認すればよいです。
+
+## 自分で答えてみる
+
+- World Modelのinputとoutputは何か。
+- `z_t`と`h_t`はどう違うか。
+- なぜrolloutはteacher forcingより難しいか。
+- なぜAgent位置のlossを追加したのか。
+- 完全観測Grid Worldで、GRUが必要だと結論できないのはなぜか。
+
+これらに答えられなければ、数式へ進まず、`outputs/rollout_comparison.png`を見ながら上の図に戻ってください。

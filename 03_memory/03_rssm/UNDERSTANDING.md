@@ -1,92 +1,125 @@
-# RSSMを理解する
+# Lesson 3: 見えるときに学び、見えない未来を想像する
 
-## 解決する問題
+GRUは過去をメモできます。しかし未来を予測するとき、未来の画像を見ることはできません。RSSMは、この当たり前の問題を正面から扱います。
 
-deterministic GRUは履歴を持てるが、「観測を見る前の予測」と「観測を見た後の推論」を区別しない。RSSMはpriorとposteriorを分け、観測系列で学びながら未来を観測なしで想像できるようにする。
+## まず困ること
 
-## Before / After
+Agentが次にどう動いたかを予測したいとします。
 
-```text
-Before: h_{t+1}=GRU([z_t,a_t],h_t), z_hat_{t+1}=head(h_{t+1})
-After:  h_t=GRU(h_{t-1},[z_{t-1},a_{t-1}])
-        p(z_t|h_t): 観測前の予測
-        q(z_t|h_t,o_t): 観測後の補正
-```
-
-`h_t`は決定論的な履歴、`z_t`は現在の確率的仮説である。Encoder output `e_t`は観測特徴であり、`z_t`そのものではない。
-
-## 数式と必要性
+学習中には、正解の次画像があります。画像を見れば「実際にはこうなった」と分かります。
 
 ```text
-h_t = GRU(h_{t-1},[z_{t-1},a_{t-1}])
-p(z_t|h_t) = N(mu_p, diag(sigma_p^2))
-q(z_t|h_t,o_t) = N(mu_q, diag(sigma_q^2))
-z_t = mu_q + sigma_q * epsilon, epsilon~N(0,I)
+画像を見る前: 次はどうなりそう？
+画像を見た後: 実際にはこうだった。予想を直そう。
 ```
 
-- `h_t`: actionと順序を運ぶ。ないとpriorは履歴を失う。
-- prior: future observationなしで使う分布。imaginationに必須。
-- posterior: 実画像が与える追加情報でstateを補正する。
-- reparameterization: randomnessを`epsilon`へ移し、`mu/sigma`へgradientを流す。
-- positive std: `softplus(raw_std)+0.1`でKLの不安定を避ける。
+未来を想像するときには、二つ目はできません。未来の正解画像がないからです。
 
 ```text
-KL(q||p) = log(sigma_p/sigma_q)
-         + (sigma_q^2+(mu_q-mu_p)^2)/(2*sigma_p^2) - 1/2
+未来を想像中: 画像を見る前の予想だけで進むしかない
 ```
 
-reconstructionだけならposteriorだけが良くなり得る。KLはpriorがposteriorのstateを予測するようにし、rollout時にDecoderが未学習latentへ行くのを防ぐ。free natsは小さなKLをさらに潰す圧力を止める。
+RSSMは、この二つを別々の部品にします。
 
-## 観測あり学習と観測なしrollout
+## priorとposteriorを日常語で考える
+
+| 名前 | いつ使うか | たとえ |
+|---|---|---|
+| prior | 次の画像を見る前 | ドアを開ける前の予想 |
+| posterior | 実際に画像を見た後 | ドアを開けて見た後の修正 |
+
+たとえば「廊下の先にGoalがあるかもしれない」と予想して歩くのがpriorです。次の画像でGoalが見えたら、予想を修正するのがposteriorです。
+
+世界モデルは、学習中にposteriorを使って正解を学び、未来rollout中にはpriorだけで進めなければなりません。
+
+## `h`、`z`、`e`を分ける
+
+RSSMでは似た数字の並びが三つ出ます。役割だけを分けて覚えてください。
+
+| 名前 | 一言でいうと | どこから来るか |
+|---|---|---|
+| `e_t` | 今の画像を読んだ特徴 | Encoder(`o_t`) |
+| `h_t` | 過去の出来事メモ | 前のstateとactionをGRUで更新 |
+| `z_t` | 今の世界についての仮説 | priorまたはposteriorの分布から作る |
+
+`h_t`は履歴のメモ帳、`z_t`は「今の世界はこうかもしれない」という現在の仮説です。二つは同じものではありません。
+
+## 実際の流れ
+
+### 学習中: 正解画像がある
 
 ```text
-observed sequence:
-previous state/action -> h_t -> prior
-o_t -> Encoder -> e_t -> posterior -> z_t -> decode
-
-future rollout:
-posterior seed -> action -> h_{t+1} -> prior -> z_{t+1} -> decode
+過去のメモとaction -> h_t
+今の画像 -> e_t
+h_t と e_t -> posterior
+posteriorから z_t を作る
+[h_t,z_t] -> 今の画像を復元する
 ```
 
-future imageをrolloutへ渡すとfilteringになり、predictionではなくなる。
+### 未来を想像するとき: 正解画像がない
 
-## コード対応
+```text
+過去のstateとaction -> h_{t+1}
+h_{t+1} -> prior
+priorから z_{t+1} を作る
+[h_{t+1},z_{t+1}] -> 次の画像を予測する
+```
 
-| 概念 | 実装 |
+ここでfuture imageをEncoderへ入れると、想像ではなく答えを見ながらの推論になってしまいます。testでは、priorが未来画像に依存していないことを確認しています。
+
+## KL divergenceは何をしているか
+
+最初は名前が難しく見えますが、役割は単純です。
+
+```text
+posterior: 画像を見たので正解に近い
+prior:     画像なしで予想した
+
+KL: priorの予想をposteriorの答えに近づける
+```
+
+posteriorだけが画像を復元できても、priorが違う場所へ行けば未来rolloutは壊れます。KL lossは「画像を見ているときに得た知識を、画像なしの予測にも移す」ためにあります。
+
+数式は、二つの確率分布のズレを計算しているだけです。今は暗記しなくて大丈夫です。
+
+## stochastic stateは何のためか
+
+同じ履歴でも未来が一つに決まらない場合があります。たとえば見えない場所に複数の可能性があるときです。`z_t`を一つの数字ではなく「平均と広がりを持つ分布」として扱うと、複数の可能性を表せる余地があります。
+
+ただし、この小さなGrid Worldはほぼ決定論的です。この実験でstochastic stateが存在することは確認できても、「不確実性を正しく測れた」証拠ではありません。
+
+## lossは何を教えるか
+
+| loss | 役割 |
 |---|---|
-| `h_t` transition | `rssm.py::RecurrentStateSpaceModel.transition` |
-| prior | `prior`, `GaussianHead.forward` |
-| posterior | `infer_posterior` |
-| sample | `DiagonalGaussian.sample` |
-| filtering / imagination | `observe` / `imagine` |
-| image model | `ObservationEncoder`, `ObservationDecoder` |
-| KL / objective | `rssm_losses.py` |
+| reconstruction loss | `[h,z]`に画像の情報を残す |
+| Goal loss | 小さなGoalを背景に埋もれさせず、stateがGoalを覚えたか確認する |
+| KL loss | priorをposteriorへ近づける |
 
-## 外すとどうなるか
+この実験では画像の小さなGoalを無視するshortcutが実際に起きました。だからpixel MSEだけでなくGoal headも使っています。
 
-| 外す部品 | 結果 |
-|---|---|
-| `h_t` | priorが再帰的履歴を失う |
-| `z_t` | deterministic recurrent modelへ戻る |
-| prior | 観測なし未来stateを作れない |
-| posterior | 現在観測によるbelief修正ができない |
-| KL | posterior再構成が良くてもprior rolloutが壊れ得る |
-| reparameterization | sampleからGaussian parameterへgradientが流れない |
-| Decoder/head | stateに視覚的・意味的情報を残す理由が弱い |
-| future-image遮断 | evaluationがground truth leakする |
+## コードを読む順番
 
-## 説明できるようになる確認項目
+```text
+rssm.py の ObservationEncoder
+-> transition（hを更新）
+-> prior / posterior
+-> observe（画像あり）
+-> imagine（画像なし）
+-> rssm_losses.py の KL
+-> evaluate.py の rollout
+```
 
-- `h_t`、`z_t`、`e_t`の違いを説明できるか。
-- priorとposteriorが知っている情報の差は何か。
-- なぜtrainingはposterior、imaginationはpriorを使うか。
-- KLの両側に何の分布があり、なぜ必要か。
-- reparameterizationはどのgradient問題を解くか。
-- 画像再構成が良くてもprior rolloutが悪くなり得る理由は何か。
-- stochastic stateがcalibrated uncertaintyを保証しない理由は何か。
+最初は`DiagonalGaussian.sample`の細部を飛ばして構いません。`observe`と`imagine`が別methodになっている理由を理解することが先です。
 
-## 次の問い
+## 自分で答えてみる
 
-- prior stdは小さな決定論的taskで意味のあるuncertaintyか。
-- sampled rolloutやcategorical likelihoodは平均化artifactを減らすか。
-- Goal headをprobeだけにしてもmemory情報は残るか。
+- priorとposteriorは何が違うか。
+- なぜ未来rolloutではposteriorを使えないか。
+- KL lossを外すと何が起きそうか。
+- `h_t`、`z_t`、`e_t`はそれぞれ何か。
+- 画像MSEが低くてもGoalを覚えたとは限らない理由は何か。
+
+## ここまでで十分な理解
+
+「RSSMは、過去を覚えるGRUに、画像を見る前の予想priorと、画像を見た後の修正posteriorを足したもの」と説明できれば、最初の目標は達成です。

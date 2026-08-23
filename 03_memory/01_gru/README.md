@@ -2,6 +2,16 @@
 
 状態: 完了（2026-08-22）。
 
+## まずここだけ読む
+
+この実験は、Agentがactionをすると次の画像がどう変わるかを当てる練習である。GRUは「過去を覚えるメモ帳」を追加する部品だと思えばよい。
+
+```text
+今の画像 + action -> 次の画像
+```
+
+まず[UNDERSTANDING.md](UNDERSTANDING.md)のLesson 1を読む。以下のArchitecture、数式、実測値は、仕組みを理解した後に戻って確認するための技術記録である。
+
 ## 目的
 
 action-conditioned latent dynamicsへ再帰的hidden stateを導入し、one-step予測、hidden stateの伝播、autoregressiveなmulti-step rolloutが正しく動くことを、独立したPyTorch実験として確認する。

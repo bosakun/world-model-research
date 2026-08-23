@@ -2,6 +2,12 @@
 
 状態: 完了（2026-08-22）。TransDreamerとTransformerを参考にした小規模教育用causal world modelであり、TransDreamerの完全再現ではない。
 
+## まずここだけ読む
+
+GRUが過去を一つのメモ帳へ要約するのに対し、Transformerは過去の出来事をページとして残し、必要なページを見返す。まず[UNDERSTANDING.md](UNDERSTANDING.md)のLesson 4を読む。
+
+以下のattention式やtensor shapeは、その比喩を実際のcodeへ落とすための技術記録である。
+
 ## 目的・問題・仮説
 
 GRU/RSSMは過去を一つのrecurrent vectorへ圧縮する。効率的だが、古い出来事を使うには情報が全intermediate updateを生き残る必要がある。Transformerは過去のlatent/action token列を明示的に保持し、現在の予測がcontent-dependentなweightで履歴へアクセスできる。

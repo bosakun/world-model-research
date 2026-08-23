@@ -2,6 +2,12 @@
 
 状態: 完了（2026-08-22）。PlaNetを主要な参考にした教育用の簡略実装であり、完全再現ではない。
 
+## まずここだけ読む
+
+未来を想像するとき、未来の正解画像は見られない。RSSMは「画像を見る前の予想（prior）」と「画像を見た後の修正（posterior）」を分けるmodelである。
+
+先に[UNDERSTANDING.md](UNDERSTANDING.md)のLesson 3を読む。以下のGaussian、KL、tensor shapeは、その考えを正確に実装するための技術記録である。
+
 ## 目的
 
 GRUは履歴を保持できるが、観測を見る前の予測と、観測を見た後のstate推論を区別しない。RSSMは決定論的state `h_t`、stochastic state `z_t`、予測用prior、観測で補正するposteriorを持つ。観測系列で学び、未来画像なしでもpriorだけでrolloutすることが目的である。
