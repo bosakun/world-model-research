@@ -1,0 +1,10 @@
+{
+  "dataset_version": "noisy-robot-transitions-v1",
+  "seed": 271,
+  "action_conditioned_probe_rmse": 0.15996421873569489,
+  "zero_action_probe_rmse": 0.1841781884431839,
+  "target_encoder_probe_rmse": 0.013911022804677486,
+  "mean_predicted_latent_std": 0.3457540273666382,
+  "uses_pixel_decoder": false,
+  "evaluation_entry_point": "python 12_physical_ai/01_action_conditioned_jepa/evaluate.py"
+}

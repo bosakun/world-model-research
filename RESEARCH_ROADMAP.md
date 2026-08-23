@@ -91,8 +91,8 @@ Adding a GRU hidden state creates a valid mechanism for retaining trajectory his
 
 ## 12 Physical AI
 
-- **Implementing** — `01_action_conditioned_jepa`: action-conditioned predictive representation for noisy physical trajectories
-- **Not Started** — Robot and autonomous-driving transfer (V-JEPA 2, DayDreamer, OccWorld)
+- **Completed** — `01_action_conditioned_jepa`: EMA target, action predictor, anti-collapse losses, state probes, and action ablation on noisy robot transitions
+- **Implementing** — `02_robot_interface`: bounded robot adapter, replay, human demonstrations, and offline imitation/online transition boundary
 
 ## 90 Evaluation
 

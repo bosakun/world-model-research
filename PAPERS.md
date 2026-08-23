@@ -86,6 +86,6 @@ The year below follows the first public paper/proceedings record. Metadata and U
 
 | Status | Paper | Authors | Year | Primary source | Roadmap relevance |
 |---|---|---|---:|---|---|
-| Not Read | V-JEPA 2: Self-Supervised Video Models Enable Understanding, Prediction and Planning | Mido Assran et al. | 2025 | https://arxiv.org/abs/2506.09985 | Latent video prediction and action-conditioned robot planning |
+| Implemented | V-JEPA 2: Self-Supervised Video Models Enable Understanding, Prediction and Planning | Mido Assran et al. | 2025 | https://arxiv.org/abs/2506.09985 | Simplified action-conditioned JEPA with EMA target and anti-collapse diagnostics in `12_physical_ai/01_action_conditioned_jepa`; not a video/robot reproduction |
 | Not Read | DayDreamer: World Models for Physical Robot Learning | Philipp Wu, Alejandro Escontrela, Danijar Hafner, Ken Goldberg, Pieter Abbeel | 2022 | https://arxiv.org/abs/2206.14176 | Online Dreamer learning on physical robots |
 | Implemented | OccWorld: Learning a 3D Occupancy World Model for Autonomous Driving | Wenzhao Zheng, Weiliang Chen, Yuanhui Huang, Borui Zhang, Yueqi Duan, Jiwen Lu | 2023 | https://arxiv.org/abs/2311.16038 | Compact binary-voxel future occupancy mechanism in `09_spatial_representation/04_occupancy_3d`; not an autonomous-driving reproduction |
