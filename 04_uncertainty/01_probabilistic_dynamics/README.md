@@ -1,229 +1,151 @@
-# Probabilistic Dynamics: Learning Aleatoric Uncertainty
+# 確率的Dynamics: 世界にある偶然を予測する
 
-Status: completed on 2026-08-22. This is an independent heteroscedastic point-dynamics experiment informed by PETS and uncertainty literature, not a PETS reproduction.
+状態: 2026-08-22に完了。これはPETSの考え方を参考にした独立した小規模実装であり、PETSの完全再現ではありません。
+
+英語の技術記録（数式の原文、全実験条件、詳細な出典）は [README_TECHNICAL_EN.md](README_TECHNICAL_EN.md) に保存しています。このREADMEでは、同じ実装内容を日本語で説明します。
 
 ## Purpose
 
-Change a deterministic next-state prediction into a Gaussian distribution and learn input-dependent process noise. This isolates **aleatoric uncertainty**: randomness inherent in a transition that remains even with abundant data.
+次stateを一つの点として予測するmodelを、「中心」と「ばらつき」を持つGaussian分布として予測するmodelへ変えます。ここで扱うのは aleatoric uncertainty、つまり十分なデータがあっても残る世界そのものの偶然です。
 
 ## Problem
 
-MSE produces a point estimate. It can learn the conditional mean but cannot distinguish a reliably predictable transition from one whose outcomes vary. Planning with only a mean trajectory can therefore be overconfident.
+MSEで学習したmodelは、複数の結果があり得るとき平均付近を一つ出します。しかし、予測が安定している場所と、結果が大きく揺れる場所を区別できません。平均だけの未来を使ってplanningすると、危険な広がりを見落として自信過剰になり得ます。
 
 ## Previous Model
 
-The Memory experiments output deterministic images/latents, except that RSSM contains a stochastic latent variable. They did not evaluate whether a predicted standard deviation matches known transition noise. This experiment uses a simple continuous state so uncertainty has an exact ground truth.
+03 Memoryまでのmodelは、画像またはlatentを決定的に予測していました。RSSMにはstochastic latentがありますが、「予測した標準偏差が実際の遷移ノイズと合うか」は評価していませんでした。今回は正解のノイズ量が分かる小さな連続状態環境で確認します。
 
 ## Hypothesis
 
-A dynamics network trained by Gaussian negative log-likelihood will learn both mean motion and the known heteroscedastic noise scale. Sampled rollouts should spread over horizon while deterministic mean rollout stays repeatable.
+Gaussian NLLで学習すれば、modelは平均的な移動と、入力により変化する既知のノイズ量の両方を学ぶはずです。sampleしたrolloutは時間とともに広がり、平均だけのrolloutは毎回同じ軌跡になるはずです。
 
 ## Architecture
 
-```text
-state s_t [2] + one-hot action a_t [4]
-                  |
-                MLP
-             /         \
-    mean delta [2]   raw log variance [2]
-          |               |
-  mu_{t+1}=s_t+delta   bounded logvar
-             \           /
-         N(mu_{t+1}, diag(sigma^2_{t+1}))
-                    |
-           mean or sampled next state
-```
+    state s_t [2] + one-hot action a_t [4]
+                         |
+                        MLP
+                    /         \
+         mean delta [2]    raw log variance [2]
+                    \         /
+              Gaussian N(mu, diag(sigma^2))
+                         |
+               mean またはsampleした次state
 
-The data generator applies known action deltas and input-dependent Gaussian noise. True noise standard deviation is stored for evaluation only.
-
-## Data Flow
-
-```text
-(s_t,a_t) -> stochastic environment -> sampled s_{t+1}
-     |                                  |
-     +-> probabilistic model -----------+
-                  |
-           Gaussian NLL training
-
-rollout: sampled s_{t+1} becomes the next model input
-```
+環境側ではactionごとの移動量に、場所とactionで大きさが変わるGaussian noiseを加えます。真のnoise standard deviationは評価の答え合わせにだけ使います。
 
 ## Tensor Shapes
 
-| Tensor | Shape | Meaning |
+| Tensor | Shape | 意味 |
 |---|---|---|
-| states | `[B,2]` | continuous `(x,y)` |
-| one-hot actions | `[B,4]` | left/right/down/up |
-| next states | `[B,2]` | one noisy transition sample |
-| predicted mean/log variance/std | `[B,2]` | diagonal Gaussian parameters |
-| sequence states | `[B,T+1,2]` | stochastic ground-truth rollout |
-| sequence actions | `[B,T,4]` | action controls |
-| model rollout states/means/stds | `[B,T,2]` | predicted trajectory distribution |
+| states | [B, 2] | 連続座標 (x, y) |
+| actions | [B, 4] | left/right/down/upのone-hot |
+| next states | [B, 2] | noiseを含む次state |
+| mean / log variance / std | [B, 2] | 予測Gaussianのパラメータ |
+| sequence states | [B, T+1, 2] | 正解rollout |
+| sequence actions | [B, T, 4] | action列 |
+| rollout states / means / stds | [B, T, 2] | modelの未来予測 |
 
 ## Mathematics
 
-The synthetic transition is
+環境の遷移は次です。
 
-```text
-s_{t+1} = s_t + delta(a_t) + epsilon_t,
-epsilon_t ~ N(0, diag(sigma_true(s_t,a_t)^2)).
-```
+    s_{t+1} = s_t + delta(action_t) + epsilon_t
+    epsilon_t ~ N(0, diag(sigma_true(s_t, action_t)^2))
 
-Horizontal noise grows sigmoidally with `x`; vertical actions have larger vertical noise. The model predicts
+modelは次の分布を予測します。
 
-```text
-p_theta(s_{t+1}|s_t,a_t) = N(mu_theta, diag(sigma_theta^2)).
-```
+    p_theta(s_{t+1} | s_t, action_t)
+    = N(mu_theta, diag(sigma_theta^2))
 
-For state dimension `j`, Gaussian NLL is
+Gaussian NLLには二つの役割があります。
 
-```text
-L_j = 1/2 [log(sigma_j^2) + (target_j-mu_j)^2/sigma_j^2 + log(2pi)].
-```
+    正解と平均の差が大きい -> lossが増える
+    varianceを大きく出しすぎる -> lossが増える
 
-The squared-error term rewards correct means, while `log(sigma^2)` prevents the model from making variance arbitrarily large. Learned soft upper/lower log-variance bounds prevent numerical extremes.
+よってmodelは、当てられる場所では狭く、偶然が大きい場所では広く予測する必要があります。log varianceには学習可能な上下限を置き、極端に小さい/大きいvarianceによる数値不安定を防ぎます。
 
-Sampling uses
+sampleは次の形です。
 
-```text
-s_hat_{t+1} = mu + sigma * epsilon, epsilon~N(0,I).
-```
+    s_hat = mu + sigma * epsilon
+    epsilon ~ N(0, I)
 
 ## Code Mapping
 
-| Concept | File / symbol |
+| 概念 | コード |
 |---|---|
-| known stochastic environment | `stochastic_dataset.py::stochastic_transition` |
-| heteroscedastic `sigma_true` | `transition_noise_std` |
-| transition and sequence datasets | `HeteroscedasticTransitionDataset`, `StochasticPointSequenceDataset` |
-| Gaussian network | `probabilistic_dynamics.py::ProbabilisticDynamics` |
-| bounded log variance | `ProbabilisticDynamics.forward` |
-| reparameterized state sample | `GaussianPrediction.sample` |
-| Gaussian NLL | `probabilistic_losses.py::diagonal_gaussian_nll` |
-| sampled rollout | `ProbabilisticDynamics.rollout` |
-| coverage/calibration plots | `evaluate.py::evaluate` |
+| ノイズを持つ環境 | stochastic_dataset.py の stochastic_transition |
+| 真のノイズ量 | transition_noise_std |
+| Gaussian model | probabilistic_dynamics.py の ProbabilisticDynamics |
+| varianceの制限 | ProbabilisticDynamics.forward |
+| reparameterized sampling | GaussianPrediction.sample |
+| Gaussian NLL | probabilistic_losses.py の diagonal_gaussian_nll |
+| sample rollout | ProbabilisticDynamics.rollout |
+| coverageとグラフ | evaluate.py の evaluate |
 
 ## Training
 
-```bash
-.venv/bin/python 04_uncertainty/01_probabilistic_dynamics/train.py
-.venv/bin/python 04_uncertainty/01_probabilistic_dynamics/evaluate.py
-.venv/bin/python -m pytest -q 04_uncertainty/01_probabilistic_dynamics/tests
-```
+    .venv/bin/python 04_uncertainty/01_probabilistic_dynamics/train.py
+    .venv/bin/python 04_uncertainty/01_probabilistic_dynamics/evaluate.py
+    .venv/bin/python -m pytest -q 04_uncertainty/01_probabilistic_dynamics/tests
 
-| Reproducibility item | Value |
+| 項目 | 値 |
 |---|---|
-| seed / dataset | 37 / `heteroscedastic-point-v1` |
+| seed / dataset | 37 / heteroscedastic-point-v1 |
 | train / validation | 1024 / 256 transitions |
-| model | two 64-unit SiLU hidden layers, diagonal Gaussian |
-| optimizer / rate | Adam / `1e-3` |
+| model | 64 unitのSiLU層2つ、diagonal Gaussian |
+| optimizer / learning rate | Adam / 1e-3 |
 | batch / epochs / steps | 64 / 80 / 1280 |
-| parameters | 4,872 |
-| checkpoint | format 1, `outputs/checkpoint.pt`, gitignored |
-| evaluation | `python 04_uncertainty/01_probabilistic_dynamics/evaluate.py` |
+| parameter数 | 4,872 |
+| checkpoint | outputs/checkpoint.pt（git管理外） |
 
 ## Losses
 
-- Gaussian NLL jointly trains transition mean and aleatoric variance.
-- A `1e-4` bound regularizer discourages excessively wide trainable log-variance bounds.
-- No ensemble disagreement appears here; this model does not estimate epistemic uncertainty.
+- Gaussian NLL: 平均とaleatoric varianceを同時に学ぶ。
+- bound regularizer（1e-4）: log varianceの上下限が不必要に広がるのを抑える。
+- ensemble disagreementはここでは扱わない。epistemic uncertaintyは次の実験の担当です。
 
-## Evaluation Interface
+## Evaluation
 
-Evaluation reports next-state RMSE, Gaussian NLL, empirical 1σ/2σ coverage, correlation between predicted and known noise std, mean predicted/true std, sample count, horizon, and parameter count. It also visualizes an uncertainty curve and 64 sampled rollouts.
+評価では、next-state RMSE、Gaussian NLL、1σ/2σ coverage、予測stdと真のstdの相関、sample rolloutを確認します。
+
+coverageは「正解が予測範囲に入った割合」です。校正されたGaussianなら、1σは約68.3%、2σは約95.4%になります。ただし範囲を無限に広げてもcoverageだけは高くできるため、NLLやsharpnessも必要です。
 
 ## Smoke Test Results
 
-All eight experiment tests passed: dataset/sequence alignment, known heteroscedasticity, positive finite variance, analytic standard-normal NLL, reparameterization gradients, mean/variance gradient flow, rollout shapes, and stochastic versus deterministic behavior.
+8件のtestが成功しました。datasetの時系列対応、既知のheteroscedastic noise、正で有限なvariance、NLL、reparameterizationのgradient、rollout shape、sampleとmeanの違いを確認しています。
 
-| Metric | Result |
+| 指標 | 結果 |
 |---|---:|
-| train NLL `epoch 1 -> 80` | `1.29975 -> -3.65436` |
+| train NLL（epoch 1 -> 80） | 1.29975 -> -3.65436 |
 | validation NLL | -3.73237 |
-| held-out next-state RMSE | 0.05686 |
+| held-out RMSE | 0.05686 |
 | held-out Gaussian NLL | -3.59307 |
-| within 1σ coverage | 0.6953 |
-| within 2σ coverage | 0.9531 |
+| 1σ / 2σ coverage | 0.6953 / 0.9531 |
 | predicted/true std correlation | 0.9376 |
-| mean predicted std `(x,y)` | `(0.0532,0.0453)` |
-| mean true std `(x,y)` | `(0.0539,0.0438)` |
+| mean predicted std (x, y) | (0.0532, 0.0453) |
+| mean true std (x, y) | (0.0539, 0.0438) |
 
-Negative NLL is valid for continuous densities: density values can exceed one when a distribution is narrow. It is not a negative probability.
+連続分布のNLLが負になることは正常です。狭い分布では確率密度が1を超えられるためで、負の確率という意味ではありません。
 
-## Failure Cases
+## Failure Cases / Limitations
 
-- `aleatoric_std.png` shows predicted std diverging above the true curve outside/near the edge of the training range. A single network has no separate “I lack data here” channel, so model error can contaminate its variance estimate.
-- Diagonal Gaussian cannot express correlated noise or multiple separated outcome modes.
-- Calibration on held-out in-distribution samples does not imply OOD calibration.
-- Repeated sampling spreads trajectories rapidly; mean rollout hides this risk.
+- training範囲の外では、予測stdが真のcurveから外れます。一つのmodelだけでは「データがない」を独立して表せず、model errorがvarianceへ混ざります。
+- diagonal Gaussianは、相関したnoiseや二つに分かれた結果を表せません。
+- in-distributionでの校正は、未知の分布でも正しいことを保証しません。
+- 小さな2次元合成環境であり、画像Dynamicsの比較ではありません。
 
 ## Findings
 
-- NLL recovered the known input-dependent noise closely in the data-supported region.
-- Coverage is close to Gaussian reference rates (~0.68 and ~0.95).
-- Mean accuracy and uncertainty calibration are separate evaluation axes.
-- OOD divergence motivates an ensemble that can measure parameter/model disagreement separately.
-
-## Limitations
-
-- Two-dimensional synthetic state, not image/latent dynamics.
-- Gaussian noise is exactly the model family assumed by the learner.
-- One seed and no formal baseline comparison.
-- No epistemic uncertainty, ensemble, trajectory-particle assignment, reward, or planning.
+入力ごとに変わるnoise量を、データがある範囲ではよく回復できました。平均の正しさと、不確実さの校正は別々に測る必要があります。training範囲の外での問題が、次のensemble実験の動機です。
 
 ## Compare Later
 
-- Compare deterministic MSE versus probabilistic NLL on mean RMSE and calibration.
-- Compare single probabilistic model versus ensemble in- and out-of-distribution.
-- Metrics: NLL, RMSE, coverage, calibration curve, sharpness, epistemic/aleatoric decomposition, rollout coverage, parameters, latency.
-- Expected advantage: state-dependent risk and sampleable futures.
-- Expected weakness: distributional misspecification and variance absorbing model error.
-- Ablations: fixed variance, homoscedastic variance, unbounded variance, mean-only rollout, sampled rollout.
-
-## Final Model Candidate
-
-```text
-Candidate:
-Yes for a probabilistic output head; exact Gaussian form Undecided.
-
-Reason:
-Planning should know outcome spread, and the smoke task verifies calibrated input-dependent variance.
-
-Advantages:
-- separates mean prediction from transition noise
-- supports NLL, coverage, and trajectory sampling
-- small additional output cost
-
-Disadvantages:
-- diagonal unimodal assumption
-- single model confounds OOD/model error with predicted noise
-
-Possible conflicts:
-- RSSM stochastic state also represents uncertainty but at a different latent level
-- ensemble variance must be combined without double-counting aleatoric variance
-```
-
-## Next Questions
-
-1. Can an ensemble make epistemic uncertainty rise outside the training state region?
-2. Does more data reduce ensemble disagreement while leaving aleatoric variance intact?
-3. How should mixture/multimodal output distributions replace a diagonal Gaussian?
-4. How should particles propagate both uncertainty types through long rollout?
+deterministic MSE modelとの比較、single Gaussianとensembleの比較を行います。見る指標はRMSE、NLL、coverage、calibration、rolloutの広がり、parameter数、推論時間です。
 
 ## References
 
-### Deep Reinforcement Learning in a Handful of Trials using Probabilistic Dynamics Models (PETS)
+- Chua et al., Deep Reinforcement Learning in a Handful of Trials using Probabilistic Dynamics Models (PETS), 2018. https://arxiv.org/abs/1805.12114
+- Kendall and Gal, What Uncertainties Do We Need in Bayesian Deep Learning for Computer Vision?, 2017. https://arxiv.org/abs/1703.04977
 
-Authors: Kurtland Chua, Roberto Calandra, Rowan McAllister, Sergey Levine. Year: 2018. Paper: https://arxiv.org/abs/1805.12114.
-
-Used for: probabilistic neural dynamics, bounded log variance, and trajectory sampling motivation. Corresponding code: `probabilistic_dynamics.py`, `probabilistic_losses.py`, `evaluate.py`. Ensembles, bootstrap training, TS1/TS∞ propagation, CEM, and control benchmarks are not implemented in this subexperiment.
-
-### What Uncertainties Do We Need in Bayesian Deep Learning for Computer Vision?
-
-Authors: Alex Kendall, Yarin Gal. Year: 2017. Paper: https://arxiv.org/abs/1703.04977.
-
-Used for: epistemic versus aleatoric distinction and input-dependent/heteroscedastic uncertainty framing. Corresponding implementation: `transition_noise_std` and the learned variance head.
-
-### Provenance statement
-
-The synthetic continuous environment and its noise law are an **independent educational implementation**. The probabilistic-head and sampling concepts are paper-informed but do not reproduce PETS experiments.
+この環境のnoise lawは独立した教育用実装です。PETS由来なのはprobabilistic head、variance bounds、trajectory samplingの考え方です。

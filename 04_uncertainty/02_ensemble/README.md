@@ -1,224 +1,144 @@
-# Probabilistic Ensemble: Epistemic and Aleatoric Uncertainty
+# Probabilistic Ensemble: 知識不足と世界の偶然を分ける
 
-Status: completed on 2026-08-22. This is a small PETS-inspired bootstrap ensemble and trajectory-sampling experiment, not a full PETS reproduction.
+状態: 2026-08-22に完了。これはPETSに着想を得た小規模bootstrap ensembleであり、PETSの完全再現ではありません。
+
+英語の全技術記録は [README_TECHNICAL_EN.md](README_TECHNICAL_EN.md) に保存しています。
 
 ## Purpose
 
-Add model disagreement to the probabilistic transition head so uncertainty can be decomposed into expected per-model noise (aleatoric) and disagreement among model means (epistemic). Implement PETS-style particle propagation with fixed or resampled model identities.
+前の確率的Dynamics Modelへmodel同士の不一致を追加し、二種類の不確実さを分けます。
+
+    aleatoric: 各modelの中での世界の偶然
+    epistemic: model同士の予測の食い違い
+
+さらにPETSで使われるparticle rolloutのTS∞とTS1を実装します。
 
 ## Problem
 
-A single probabilistic network can predict transition noise, but outside its training support it has no reliable signal that its parameters are underdetermined. Its variance head may incorrectly absorb model error as aleatoric noise. Multiple independently trained models provide a measurable disagreement signal.
+一つの確率modelは世界のnoiseを出せますが、training範囲の外で「自分は知らない」とは言いにくいです。variance headが知識不足による誤差まで世界の偶然として吸収する可能性があります。
 
-## Previous Model
+## Previous Model / Hypothesis
 
-`01_probabilistic_dynamics` learned a diagonal Gaussian with strong in-distribution calibration. Its predicted standard deviation diverged from the known noise curve outside `x in [-0.8,0.8]`, motivating a separate epistemic mechanism.
-
-## Hypothesis
-
-Bootstrap-trained models should agree in dense training regions and disagree more outside them. The ensemble moment decomposition should retain learned aleatoric noise while exposing extra epistemic variance. Particle rollout should preserve model hypotheses differently under TS∞ and TS1.
+01_probabilistic_dynamicsはin-distributionで校正されたvarianceを学べましたが、training範囲外でstdが真のcurveから外れました。bootstrapで学習した複数modelは、データが多い場所では一致し、範囲外ではより不一致になるはずです。
 
 ## Architecture
 
-```text
-same (s_t,a_t)
-   |       |       |       |       |
- Model 0 Model 1 Model 2 Model 3 Model 4
- bootstrap datasets; independent initialization/Adam
-   |       |       |       |       |
- (mu_0,var_0) ...                 (mu_4,var_4)
-             |
- mean prediction       = mean_m(mu_m)
- aleatoric variance    = mean_m(var_m)
- epistemic variance    = variance_m(mu_m)
- total variance        = aleatoric + epistemic
-```
+    同じ state + action
+      |     |     |     |     |
+    model0 model1 model2 model3 model4
+      |     |     |     |     |
+    (mu0,var0) ...          (mu4,var4)
+                 |
+    ensemble mean      = member meanの平均
+    aleatoric variance = member varianceの平均
+    epistemic variance = member meanの分散
+    total variance     = 二つの和
 
-Each member is the bounded diagonal-Gaussian model from the previous experiment. No member or earlier folder is overwritten.
+各memberは前実験と同じdiagonal Gaussian modelです。既存実験を上書きしていません。
 
 ## Data Flow
 
-```text
-base transition dataset
-  -> five bootstrap index samples (with replacement)
-  -> independent member training by Gaussian NLL
-  -> joint prediction and variance decomposition
-  -> moment metrics / OOD map
-  -> particle rollout:
-       TS-infinity: one member per particle for entire trajectory
-       TS1:         resample member identity at every step
-```
+    transition dataset
+    -> 5個のbootstrap dataset
+    -> 5個の独立modelをGaussian NLLで学習
+    -> 同じ入力を全memberへ渡す
+    -> varianceを分解し、ID/OODとrolloutを評価
+
+TS∞では粒子ごとに最初に選んだmemberを最後まで使います。TS1では毎stepでmemberを選び直します。
 
 ## Tensor Shapes
 
-For ensemble `E=5`, batch `B`, particles `P=128`, horizon `T=12`, state `D_s=2`:
+ensemble E=5、batch B、particle P=128、horizon T=12、state dimension=2です。
 
-| Tensor | Shape | Meaning |
+| Tensor | Shape | 意味 |
 |---|---|---|
-| states/actions | `[B,2]`, `[B,4]` | shared model inputs |
-| member means/variances | `[E,B,2]` | five Gaussian predictions |
-| ensemble mean | `[B,2]` | mean of member means |
-| aleatoric/epistemic/total variance | `[B,2]` | moment decomposition |
-| rollout particles | `[B,P,T,2]` | sampled trajectories |
-| selected model IDs | `[B,P,T]` | member assignment history |
-| bootstrap indices | `[E,N]` | resampled training rows |
+| states / actions | [B, 2] / [B, 4] | 共通入力 |
+| member means / variances | [E, B, 2] | member別Gaussian |
+| ensemble mean | [B, 2] | member meanの平均 |
+| aleatoric / epistemic / total variance | [B, 2] | variance分解 |
+| rollout particles | [B, P, T, 2] | sample trajectory |
+| model IDs | [B, P, T] | 粒子が使ったmember |
+| bootstrap indices | [E, N] | 重複ありsampleの行番号 |
 
 ## Mathematics
 
-For ensemble member `m`:
+member mは次を予測します。
 
-```text
-p_m(y|x)=N(mu_m(x),Sigma_m(x)).
-```
+    p_m(y | x) = N(mu_m(x), Sigma_m(x))
 
-The law of total variance gives the implemented moment decomposition:
+全体のvarianceはlaw of total varianceで分けます。
 
-```text
-mu_bar = (1/E) sum_m mu_m
-Sigma_aleatoric = (1/E) sum_m Sigma_m
-Sigma_epistemic = (1/E) sum_m (mu_m-mu_bar)^2
-Sigma_total = Sigma_aleatoric + Sigma_epistemic.
-```
+    mean = member meanの平均
+    aleatoric = member varianceの平均
+    epistemic = member meanの分散
+    total = aleatoric + epistemic
 
-The first term is average within-model variance; the second is between-model mean disagreement. This is a finite-ensemble approximation, not an exact Bayesian posterior.
-
-Bootstrap member `m` trains on `N` indices drawn with replacement from the original `N` rows. Different data multiplicities plus initialization create diverse functions compatible with available evidence.
+これは有限個のensembleによる近似であり、厳密なBayesian posteriorそのものではありません。
 
 ## Code Mapping
 
-| Concept | File / symbol |
+| 概念 | コード |
 |---|---|
-| bootstrap resampling | `ensemble_dataset.py::bootstrap_indices` |
-| five probabilistic members | `probabilistic_ensemble.py::ProbabilisticEnsemble` |
-| variance decomposition | `ProbabilisticEnsemble.decompose` |
-| TS∞ / TS1 propagation | `ProbabilisticEnsemble.rollout` |
-| independent optimizers | `train.py::train` |
-| ID/OOD metrics | `evaluate.py::evaluate` |
-| epistemic heatmap | `outputs/epistemic_map.png` generation in `evaluate.py` |
-| reused Gaussian/NLL core | `../01_probabilistic_dynamics/probabilistic_dynamics.py`, `probabilistic_losses.py` |
+| bootstrap sampling | ensemble_dataset.py の bootstrap_indices |
+| member集合 | probabilistic_ensemble.py の ProbabilisticEnsemble |
+| variance分解 | ProbabilisticEnsemble.decompose |
+| TS∞ / TS1 rollout | ProbabilisticEnsemble.rollout |
+| 独立optimizer | train.py の train |
+| ID/OOD評価 | evaluate.py の evaluate |
 
 ## Training
 
-```bash
-.venv/bin/python 04_uncertainty/02_ensemble/train.py
-.venv/bin/python 04_uncertainty/02_ensemble/evaluate.py
-.venv/bin/python -m pytest -q \
-  04_uncertainty/01_probabilistic_dynamics/tests \
-  04_uncertainty/02_ensemble/tests
-```
+    .venv/bin/python 04_uncertainty/02_ensemble/train.py
+    .venv/bin/python 04_uncertainty/02_ensemble/evaluate.py
+    .venv/bin/python -m pytest -q 04_uncertainty/01_probabilistic_dynamics/tests 04_uncertainty/02_ensemble/tests
 
-| Reproducibility item | Value |
+| 項目 | 値 |
 |---|---|
 | seed / bootstrap seed | 41 / 42 |
-| dataset | `heteroscedastic-point-v1`, 1024 train / 256 validation |
-| ensemble | 5 independent 4,872-parameter Gaussian MLPs |
-| total parameters | 24,360 |
-| optimizer | independent Adam per member, `1e-3` |
-| epochs / steps per member | 60 / 960 |
-| checkpoint | format 1, gitignored |
-| evaluation | `python 04_uncertainty/02_ensemble/evaluate.py` |
+| dataset | heteroscedastic-point-v1、train 1024 / validation 256 |
+| ensemble | 4,872 parameterのGaussian MLPを5個 |
+| total parameter数 | 24,360 |
+| optimizer / learning rate | memberごとのAdam / 1e-3 |
+| epochs / steps | 60 / memberごとに960 |
 
 ## Losses
 
-Each member independently uses the previous experiment's Gaussian NLL and variance-bound regularizer. There is no explicit diversity loss: diversity comes from bootstrap samples and initialization. Ensemble uncertainty is computed at evaluation/rollout time, not added as a supervised target.
+各memberは前実験と同じGaussian NLLとvariance-bound regularizerを使います。memberを無理に違わせるlossは使いません。bootstrap dataと初期値の違いからdiversityを作ります。
 
-## Evaluation Interface
+## Evaluation
 
-Evaluation reports moment-matched NLL, mean RMSE, total-variance coverage, aleatoric correlation to known noise, ID/OOD epistemic std and ratio, particles/horizon, propagation modes, and parameter count. OOD states have `|x| in [1.1,1.5]`, outside training support.
+IDとOODで、RMSE、NLL、total varianceのcoverage、aleatoric stdと真のnoiseの相関、epistemic stdを測ります。OODはtraining範囲外の x の領域です。
 
 ## Smoke Test Results
 
-All 15 uncertainty tests passed. Ensemble tests cover shapes/finite values, exact total-variance identity, zero epistemic variance for identical means, bootstrap diversity, gradients through all members, TS∞ identity persistence, TS1 switching, and mode validation.
+15件のuncertainty testが成功しました。shape、varianceの分解式、同じmeanならepistemicが0になること、bootstrap diversity、全memberへのgradient、TS∞/TS1のmodel IDを確認しています。
 
-| Metric | Result |
+| 指標 | 結果 |
 |---|---:|
-| train member-mean NLL `epoch 1 -> 60` | `1.30675 -> -3.56282` |
+| train member-mean NLL（epoch 1 -> 60） | 1.30675 -> -3.56282 |
 | validation member-mean NLL | -3.68912 |
-| moment-matched held-out NLL | -3.58230 |
 | held-out RMSE | 0.06051 |
-| 1σ / 2σ total coverage | 0.7324 / 0.9668 |
-| aleatoric predicted/true std correlation | 0.9526 |
+| 1σ / 2σ coverage | 0.7324 / 0.9668 |
+| aleatoric std correlation | 0.9526 |
 | ID epistemic std | 0.01066 |
 | OOD epistemic std | 0.01640 |
-| OOD / ID epistemic ratio | 1.5383 |
+| OOD / ID ratio | 1.5383 |
 
-## Failure Cases
+## Failure Cases / Limitations
 
-- OOD epistemic disagreement rises, but only modestly. The learned member aleatoric variances grow much more and dominate total uncertainty outside support.
-- Total coverage is slightly conservative; adding epistemic variance improves safety margin but can reduce sharpness.
-- Bootstrap neural ensembles are not guaranteed to cover every plausible model or detect every OOD input.
-- Moment matching compresses a mixture of Gaussians into one Gaussian and can hide multimodality.
-- TS1 changes model identity each step and can create trajectories inconsistent with any one learned dynamics hypothesis; TS∞ can preserve a bad member for the entire horizon.
+- OODでepistemicは上がりましたが、memberのaleatoric varianceの増加の方が大きく、二つは完全には分離できませんでした。
+- bootstrap ensembleがすべての未知入力を検出する保証はありません。全memberが同じ偏りを共有すれば、そろって間違えます。
+- Gaussian mixtureを一つのGaussianへmoment matchすると、二つに分かれた未来を隠すことがあります。
+- TS1は一つの一貫したworld hypothesisに存在しないtrajectoryを作る可能性があり、TS∞は悪いmemberを長く信じる可能性があります。
+- 小さな合成環境、member数5、一つのseedでの確認です。
 
-## Findings
+## Findings / Compare Later
 
-- Ensemble disagreement is spatially lowest inside most training support and increases toward/OOD beyond its boundary.
-- Aleatoric variance remains strongly correlated with the true process noise after ensembling.
-- The two uncertainty types can be computed separately, but learned models do not guarantee a perfectly clean semantic decomposition.
-- Propagation choice is part of the world-model assumption, not an implementation detail.
-
-## Limitations
-
-- Five members, one ensemble seed, tiny synthetic dynamics.
-- OOD split is deliberately geometric and easy to define.
-- No elite selection, input/output normalization, PETS benchmark, CEM controller, reward model, or receding-horizon control.
-- Sequential Python member execution; no vectorized ensemble layers.
-
-## Compare Later
-
-- Single Gaussian versus ensembles of 3/5/10 members.
-- Bootstrap versus identical data, initialization-only diversity, or Bayesian approximations.
-- Metrics: ID/OOD NLL, coverage, sharpness, error-detection AUROC, epistemic/data-size response, rollout coverage, compute/memory.
-- Expected advantage: data-support sensitivity and multiple dynamics hypotheses.
-- Expected weakness: linear parameter/training cost and unreliable disagreement under shared bias.
-- Ablations: no bootstrap, shared initialization, deterministic members, fixed member variance, TS1 versus TS∞, moment matching versus mixture scoring.
-
-## Final Model Candidate
-
-```text
-Candidate:
-Yes for high-stakes rollout/planning experiments; size/propagation Undecided.
-
-Reason:
-It adds an empirically distinct OOD disagreement signal and supports PETS-style particles.
-
-Advantages:
-- separate within-member and between-member variance
-- easy bootstrap implementation
-- trajectory particles retain model hypotheses
-
-Disadvantages:
-- roughly E-times parameter/training cost
-- disagreement can remain small under shared extrapolation bias
-- aleatoric heads can absorb OOD error
-
-Possible conflicts:
-- RSSM stochasticity and ensemble particles may multiply rollout cost
-- Transformer/video models make full ensembles expensive
-- planning must choose a propagation and risk objective
-```
-
-## Next Questions
-
-1. Does epistemic disagreement shrink with more in-region data while aleatoric variance stays fixed?
-2. Which PETS propagation scheme gives calibrated long-horizon coverage?
-3. Should planning penalize epistemic and aleatoric uncertainty differently?
-4. Can latent ensembles share an encoder without collapsing diversity?
+ensembleはtraining範囲の外で別のepistemic signalを出しましたが、それを万能な安全指標とは扱えません。後ではmember数、data量、single model、TS∞/TS1、planning時のrisk penaltyを比較します。
 
 ## References
 
-### Deep Reinforcement Learning in a Handful of Trials using Probabilistic Dynamics Models (PETS)
+- Chua et al., PETS, 2018. https://arxiv.org/abs/1805.12114
+- Kendall and Gal, 2017. https://arxiv.org/abs/1703.04977
 
-Authors: Kurtland Chua, Roberto Calandra, Rowan McAllister, Sergey Levine. Year: 2018. Paper: https://arxiv.org/abs/1805.12114.
-
-Used for: probabilistic ensembles, bootstrap member training, decomposition-aware motivation, and trajectory sampling with TS1/TS∞ model assignment. Corresponding code: `probabilistic_ensemble.py`, `train.py`, `evaluate.py`. This experiment omits CEM planning, reward optimization, elite selection, and PETS control benchmarks.
-
-### What Uncertainties Do We Need in Bayesian Deep Learning for Computer Vision?
-
-Authors: Alex Kendall, Yarin Gal. Year: 2017. Paper: https://arxiv.org/abs/1703.04977.
-
-Used for: aleatoric versus epistemic interpretation. Corresponding code: `ProbabilisticEnsemble.decompose` and ID/OOD evaluation.
-
-### Provenance statement
-
-The point environment, geometric OOD split, plots, and compact evaluation are **independent educational implementations**. The ensemble and trajectory-sampling mechanisms are **simplified PETS-inspired implementations**, not paper-result reproduction.
+PETSのうち、この実験が扱うのはprobabilistic ensemble、bootstrap、particle propagationです。CEM control、elite selection、PETS benchmarkはここには含みません。
