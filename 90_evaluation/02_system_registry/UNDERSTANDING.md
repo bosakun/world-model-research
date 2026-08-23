@@ -1,33 +1,32 @@
-# Understanding the Evaluation Registry
+# 評価Registryを理解する
 
-## What problem does this solve?
+## 解決する問題
 
-It separates evidence discovery from scientific comparison.
+実験が増えると結果は各folderに散らばる。後から「このグラフはどのdataset、seed、scriptで作ったか」を追えないと、研究の比較や記事化が危うくなる。
 
-## Before / After / Core Idea
+## Registryがすること・しないこと
 
-Before, results required manual folder search. After, one manifest points to raw artifacts and metadata. Preserve metric meaning instead of inventing a universal score.
+```text
+すること: evaluation_metrics.jsonを見つけ、場所とmetadataを一覧化する。
+しないこと: 異なるtaskのmetricを一つの順位に変換する。
+```
 
-## Data Flow / Mathematics / Code Mapping
+たとえばoccupancy IoU 0.5とplanning success 0.5は、同じ0.5でも意味がまったく違う。単純比較はできない。
 
-`rglob -> JSON parse -> metadata row -> lossless nested JSON + compact CSV`. Counts measure coverage only. `discover` excludes its own generated outputs to avoid recursion.
+## データフロー
 
-## Important Components
+`rglob -> JSON parse -> metadata row -> nested JSON + compact CSV + coverage plot`。
 
-Dataset version, seed, evaluation entry point, relative path, raw payload, registry version, and explicit limitations.
+各行にはphase、experiment path、metrics path、dataset version、seed、evaluation entry point、raw payloadが入る。registry自身のoutputは再帰的に読まないよう除外する。
 
-## What happens if we remove it?
+## 説明できるようになる確認項目
 
-Missing metadata goes unnoticed; one-seed results look equivalent to multi-seed evidence; integration decisions become hard to audit. If heterogeneous metrics are normalized into one score, their semantics are destroyed.
+- なぜregistryはleaderboardではないか。
+- dataset versionとseedを残す意味は何か。
+- raw nested metricsを残す理由は何か。
+- artifact数がquality scoreではない理由は何か。
+- one-seed smoke resultとmulti-seed benchmarkを同等に扱えない理由は何か。
 
-## What I Should Be Able to Explain
+## 次の問い
 
-- Why is this not a leaderboard?
-- What evidence does artifact presence provide?
-- Why are raw nested metrics retained?
-- Why is Phase 90 memory evidence separate?
-
-## Questions
-
-- Should future schemas validate metric units/types?
-- How should regenerated checkpoint hashes be tracked?
+metricの単位・型をschemaとして検査するか、checkpoint hashをどう追跡するか、OOD/physical評価をどう追加するか。

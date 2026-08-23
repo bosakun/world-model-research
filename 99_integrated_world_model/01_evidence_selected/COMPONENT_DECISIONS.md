@@ -1,38 +1,44 @@
-# Component Decision Record
+# 統合部品の採否記録
 
-この記録は、Phase 99で「全部入れる」のではなく、過去の実験結果から採用・保留・不採用を決めた根拠を固定する。
+Phase 99では「作ったものを全部足す」のではなく、過去の比較結果、失敗例、現在の課題への必要性から採否を決めた。この表は、後から「なぜ入れた・入れなかったのか」を追えるようにする記録である。
 
-| Component | Decision | Evidence | Reason / interaction |
+| 部品 | 判断 | 根拠 | 理由・他部品との関係 |
 |---|---|---|---|
-| CNN image encoder | Adopt | Phase 90の全memoryモデルが画像入力で動作 | 小さいGrid画像には十分。将来video/object encoderと置換可能 |
-| RSSM memory | Adopt | hidden-Goal accuracy `1.000±0.000`; ablation `0.500`; 4.48 ms | Transformerと同精度で低latency。prior/posteriorがimaginationへ直結 |
-| Transformer memory | Hold as alternative | hidden-Goal `1.000`; 8.05 ms | 長いcontextなら有望だが今回の短系列では追加latencyを正当化できない |
-| Plain GRU | Do not select | `0.833±0.236`; 1 seed failed | RSSMよりseed安定性が低かった |
-| No Memory | Reject | hidden-Goal `0.500` | aliasされた現在観測を原理的に区別できない |
-| Gaussian stochastic state | Adopt | RSSM test/training成功 | 観測ありposteriorと観測なしpriorの橋。今回はmean pathなので多峰性は未検証 |
-| Prior-head ensemble | Adopt provisionally | Phase 04でOOD disagreement比1.538; integrated std計測可能 | risk score interfaceを作れる。shared backboneなのでepistemic近似は弱い |
-| Latent overshooting | Adopt | Phase 05で実装、integrated loss finite | multi-step priorを直接拘束。今回単独ablationなし |
-| Reward/value/continuation | Adopt | Phase 06および統合validation | planningに必要。valueはdistance potentialへ変更 |
-| Goal auxiliary head | Adopt for experiment | hidden-Goalを直接監査可能 | true-state教師を使うtask-specific補助loss。汎用モデルでは外す候補 |
-| Image decoder | Adopt for audit | reconstruction MSE 7.45e-5 | representation可視化用。planner経路には不要 |
-| Random-shooting MPC | Adopt | integrated 40/40 success | 離散4-action・H6なら十分。大きなaction空間ではCEM等が必要 |
-| Risk penalty | Keep, benefit unproven | risk/mean-onlyとも40/40 | OODやstochastic hazard課題で再評価が必要 |
-| Imagined actor-critic | Reject for this integration | Phase 08 final distance 0.513, success false | actorがworld-model誤差を利用。MPCの再計画を優先 |
-| Slot Attention | Reject pending repair | mean best IoU 0.271 | object bindingが崩れた表現を統合しない |
-| Known-binding C-SWM / SlotFormer | Hold | 機構は動作したがordered slotsを前提 | perceptionが未知objectを安定抽出できるまで統合しない |
-| Latent action discovery | Reject pending identifiability work | true-action permutation accuracy 0.270 | dynamics精度だけではaction semanticsを保証しない |
-| VQ video tokens / UniSim adapter | Hold | individual smoke tests成功 | 現在の単一画像Grid課題には不要。video/multimodal domainで置換候補 |
-| 3D occupancy | Hold | voxel rolloutは動作 | 2D Grid課題にrepresentation mismatch |
-| Action-conditioned JEPA | Hold | physical transition probe成功 | physical/video observationへ移る際のencoder代替候補 |
-| Robot safety boundary | Adopt concept | Phase 12 guard tests成功 | 統合版では離散action validationのみ。実機前にdead-man/workspace制約が必要 |
+| CNN image encoder | 採用 | Phase 90の全memory modelで画像入力が動作 | 小さなGrid画像には十分。後でvideo/object encoderと置換可能 |
+| RSSM memory | 採用 | hidden-Goal accuracy `1.000±0.000`、ablation `0.500`、4.48 ms | Transformerと同精度で低latency。prior/posteriorがimaginationへ直結 |
+| Transformer memory | 代替候補として保留 | hidden-Goal `1.000`、8.05 ms | 長いcontextでは有望だが、短系列では追加latencyを正当化できない |
+| Plain GRU | 今回は不採用 | `0.833±0.236`、1 seed失敗 | RSSMよりseed安定性が低かった |
+| No Memory | 不採用 | hidden-Goal `0.500` | 同じ現在観測を原理的に区別できない |
+| Gaussian stochastic state | 採用 | RSSM test/training成功 | 観測ありposteriorと観測なしpriorをつなぐ。多峰性は未検証 |
+| Prior-head ensemble | 条件付き採用 | Phase 04のOOD disagreement比1.538、統合でstd計測可能 | risk scoreの入口になる。ただしbackbone共有なのでepistemic近似は弱い |
+| Latent overshooting | 採用 | Phase 05で実装、統合lossがfinite | multi-step prior driftを直接抑える。単独ablationは未実施 |
+| Reward/value/continuation | 採用 | Phase 06と統合validation | planningに必要。valueはdistance potentialへ変更 |
+| Goal auxiliary head | この実験では採用 | hidden-Goalを直接監査できる | true-state教師を使うtask-specific補助loss。汎用modelでは外す候補 |
+| Image decoder | 監査用に採用 | reconstruction MSE `7.45e-5` | 表現を画像として確認できる。planner本体は使わない |
+| Random-shooting MPC | 採用 | 統合で40/40 success | 離散4-action・horizon 6には十分。大きなaction空間ではCEM等が必要 |
+| Risk penalty | 保持するが優位性は未証明 | risk/mean-onlyとも40/40 | OODやstochastic hazardで再評価が必要 |
+| Imagined actor-critic | 今回の統合では不採用 | Phase 08 success false | actorがworld-model誤差を利用。MPCの再計画を優先 |
+| Slot Attention | 修復まで不採用 | mean best IoU 0.271 | object bindingが崩れた表現を統合しない |
+| C-SWM / SlotFormer | 保留 | 機構は動作したがordered slot前提 | unknown objectを安定抽出できるまで統合しない |
+| Latent action discovery | 修復まで不採用 | true-action alignment 0.270 | future predictionだけではactionの意味を保証しない |
+| VQ video tokens / UniSim adapter | 保留 | 個別smoke test成功 | 現在の単一画像Grid課題には不要。video/multimodalで候補 |
+| 3D occupancy | 保留 | voxel rolloutが動作 | 2D Grid課題と表現が合わない |
+| Action-conditioned JEPA | 保留 | physical transition probe成功 | physical/video observationへ移るときのEncoder候補 |
+| Robot safety boundary | 考え方を採用 | Phase 12のguard test成功 | 統合版は離散action validationだけ。実機前にdead-man/workspace制約が必要 |
 
-## Evidence strength
+## 根拠の強さ
 
-- Strong within this repository: Phase 90の3-seed memory alias accuracyとmemory ablation。
-- Moderate: 各phaseのone-seed smoke testがmechanical correctnessを示す。
-- Weak: 統合版のone-seed、二Goal、in-distribution成功率。
-- Not established: real-world transfer、risk-aware superiority、uncertainty calibration、汎用object/video/multimodal性能。
+- **このリポジトリ内で強い**: Phase 90の3-seed hidden Goal accuracyとmemory ablation。
+- **中程度**: 各phaseのone-seed smoke test。機構が動くことは示すが、一般的な優位性は示さない。
+- **弱い**: 統合版のone-seed、二つのGoal、in-distribution success。
+- **未確立**: real-world transfer、risk-awareの優位性、uncertainty calibration、汎用object/video/multimodal性能。
 
-## Decision rule
+## 判断のルール
 
-統合対象は、(1) 現在の課題で必要、(2) testとsmoke runが成功、(3) downstream interfaceが明確、の三条件を優先した。失敗した機構は履歴を消さず、修復条件とともに保留または不採用とした。
+統合する部品は、次の三条件を優先した。
+
+1. 現在の課題で必要である。
+2. testとsmoke runが成功している。
+3. 次の部品へ渡すinput/outputが明確である。
+
+失敗した機構も削除せず、修復条件とともに保留または不採用として残す。これは「失敗を隠す」のではなく、次に同じ理由で安易に採用しないためである。

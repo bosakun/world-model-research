@@ -1,30 +1,28 @@
-# Research Notes
+# 研究ノート: Memory統一比較
 
-## Hypothesis and first attempt
+## 比較前の問題
 
-- Expected all memory methods to exceed No Memory.
-- Initial result: RSSM 3/3, Transformer 1/3, GRU 0/3.
-- Cause audit found Goal heads for GRU/Transformer read the 16-D state simultaneously forced to equal the encoder of an identical local image. RSSM alone read `h+z`.
+個別実験はそれぞれ動いたが、Encoder、loss、seed、学習量が違った。数値を横に並べるだけでは「memory architectureの差」なのか「条件の差」なのか分からない。
 
-## Fairness correction
+## 重要な設計
 
-- Moved GRU Goal head to hidden state and Transformer Goal head to context token. Kept image decoder on the visual latent. RSSM already used its full state.
-- Reran all 12 trainings rather than patching metrics.
-- Final: No Memory 0.5; GRU 0.5/1/1; RSSM and Transformer 1/1/1.
-- Reset/context-1 ablations all 0.5 after RSSM ablation correctly reset both `h` and `z`.
+- even/odd pairで、最初に見えるGoalだけを変え、actionとGoal消失後の現在画像を同一にした。
+- modelが本当に持つmemory stateからGoalを読む。視覚latentに無理にすべてを押し込む不公平を避けた。
+- reset/truncate ablationを最初から入れた。
 
-## Unexpected result
+## 結果と解釈
 
-- No Memory image MSE is competitive. Most future local-view pixels are predictable without the hidden Goal.
-- RSSM perfect semantic memory did not produce best h10 image MSE.
-- GRU's single-seed collapse is precisely why three seeds mattered.
+- RSSM/Transformerは3/3 seedで1.0、GRUは平均0.833だが1 seed失敗。
+- ablation後は全memory modelが0.5。履歴情報が分類へ使われた。
+- h10 image MSEは似通い、No Memoryが悪くない場合もある。見えないGoalを忘れても、背景が大部分を占める画像は当てられる。
+- RSSMを採用したのは「最高の画像MSE」ではなく、stable memory、Transformerより低latency、prior/posteriorの下流interfaceを合わせて評価したため。
 
-## Article material
+## 記事材料
 
-- `memory_comparison.png` has horizon, alias, and ablation panels.
-- Strong explanation: “Where the probe reads from is part of benchmark fairness.”
-- Raw `per_seed_results.csv` supports a stability table.
+- `memory_comparison.png`。
+- 「同じ現在画像で二択なら、memoryなしの理論上限は50%」という説明。
+- 「複雑なmodelの採否は一つのlossで決めない」。
 
-## Later work
+## 次に調べること
 
-Equal parameter budgets, frozen probes, more seeds, stochastic transitions, and planning-based memory utility.
+more seeds、longer delay、Goal supervisionなし、noise/OOD、planning success、peak memory。

@@ -1,18 +1,26 @@
-# Evidence-selected Integrated World Model
+# 根拠に基づいて選んだ統合World Model
 
-## Purpose
+## 目的
 
 Phase 03–12で個別に実装した機構を、Phase 90の比較結果と各実験の失敗例に基づいて選択し、部分観測画像から安全な離散行動までを一つの学習・推論経路に接続する。
 
 これは「あらゆる機構を入れた最大モデル」ではない。今回のGrid World課題に必要で、実験上の根拠がある部品だけを採用した `Simplified educational implementation` である。採否の全記録は `COMPONENT_DECISIONS.md` に残す。
 
-## Problem
+### 最初に押さえる言葉
+
+- **belief state**: 過去の画像とactionをまとめた「今、世界がどうなっていそうか」という内部メモ。
+- **posterior**: 今の画像を見た後の、修正済みの予想。
+- **prior**: 次の画像を見る前の予想。未来を想像するときはこちらしか使えない。
+- **ensemble**: 少し違う複数の予測器。予測が割れる候補は不確かだとみなす。
+- **MPC**: 未来を何通りか想像し、最初のactionだけ実行して、次の観測後にまた考え直す方法。
+
+## 問題
 
 個別のencoder、memory、dynamics、uncertainty、reward/value、plannerが動いても、それらの学習時の表現と利用時の表現が一致しなければ制御系として機能しない。特に学習時だけ観測を使うposterior featureへtask headを学習し、計画時のprior featureへそのまま適用するとdistribution mismatchが起こる。
 
 統合課題では、初めに見えたGoalが2回の左移動後に視界外へ消える。現在画像は同一でもGoalは右または下にあり、memoryなしでは適切な行動を区別できない。
 
-## Previous Model
+## 前段の実験
 
 Phase 90ではRSSMとTransformerがhidden-Goal accuracy `1.000 ± 0.000`、memory ablation後は双方`0.500`だった。RSSMはTransformerよりCPU latencyが小さかった（batch 16で4.48 ms対8.05 ms）ため、統合基盤にはRSSMを選んだ。
 
@@ -24,11 +32,11 @@ Phase 90ではRSSMとTransformerがhidden-Goal accuracy `1.000 ± 0.000`、memor
 - planningは別の連続Point World上で評価されていた。
 - imagination actorはモデル誤差を利用し、実環境Goalへ到達しなかった。
 
-## Hypothesis
+## 仮説
 
 部分観測履歴をRSSM stateへfilterし、prior ensemble上のreward/valueをrisk-aware MPCで評価すれば、Goalが視界外になった後でも履歴に応じた行動を選べるはずである。
 
-## Architecture
+## アーキテクチャ
 
 ```text
 partial image o_t ── CNN encoder ── e_t
@@ -52,7 +60,7 @@ previous z + action ── GRUCell ── h_t
 
 統合した機構はCNN perception、連続Gaussian RSSM、3本のprior head、3-step latent overshooting、reward/value/continuation/goal head、離散random-shooting MPC、安全境界である。
 
-## Data Flow
+## データフロー
 
 学習時:
 
@@ -78,11 +86,11 @@ visible Goal history
 
 外部機器へのaction送信は行わず、ローカルGrid World内だけで評価した。
 
-## Tensor Shapes
+## Tensor Shape
 
 `B`: batch、`T=12`: transition数、`E=3`: ensemble数、`H=64`、`Z=16`。
 
-| Tensor | Shape | Meaning |
+| Tensor | Shape | 意味 |
 |---|---:|---|
 | observations | `[B, T+1, 3, 20, 20]` | 部分観測画像 |
 | actions | `[B, T, 4]` | one-hot離散action |
@@ -97,7 +105,7 @@ visible Goal history
 | planner candidates | `[512, 6, 4]` | horizon 6の候補action列 |
 | ensemble returns | `[3, 512]` | 候補ごとの予測return |
 
-## Mathematics
+## 数式
 
 Deterministic transition:
 
@@ -135,9 +143,9 @@ R_k=\sum_{j=0}^{H-1}\gamma^j\hat r(s^k_{t+j})
 +\gamma^H\hat V(s^k_{t+H})
 \]
 
-## Code Mapping
+## コード対応
 
-| Concept | File | Class/function |
+| 概念 | ファイル | class / function |
 |---|---|---|
 | partial navigation sequences | `dataset.py` | `IntegratedNavigationDataset` |
 | observation encoder | `model.py` | `IntegratedWorldModel.encoder`, `encode` |
@@ -151,7 +159,7 @@ R_k=\sum_{j=0}^{H-1}\gamma^j\hat r(s^k_{t+j})
 | training/checkpoint | `train.py` | `train` |
 | closed-loop evaluation | `evaluate.py` | `run_episode`, `evaluate` |
 
-## Training
+## 学習
 
 - seed: 331
 - dataset version: `integrated-partial-navigation-v1`
@@ -171,7 +179,7 @@ MPLCONFIGDIR=/tmp/world-model-mpl .venv/bin/python \
   99_integrated_world_model/01_evidence_selected/train.py
 ```
 
-## Losses
+## Loss
 
 - Reconstruction MSE: `[h_t,z_t]`が画像内容を保持するよう学習する。
 - Reward MSE: imagined transitionが即時task utilityを予測する。
@@ -181,7 +189,7 @@ MPLCONFIGDIR=/tmp/world-model-mpl .venv/bin/python \
 - KL: 観測を使うposteriorと観測なしpriorを整合させる。free natsは0.5。
 - Overshooting MSE: 3 stepまで再帰したprior meanをposterior stateへ近づける。
 
-## Evaluation Interface
+## 評価方法
 
 ```bash
 MPLCONFIGDIR=/tmp/world-model-mpl .venv/bin/python \
@@ -190,7 +198,7 @@ MPLCONFIGDIR=/tmp/world-model-mpl .venv/bin/python \
 
 `evaluation_metrics.json`にdataset version、seed、episode数、success、step、不確実性、entry pointを保存する。Phase 90 registryから再発見可能である。
 
-## Smoke Test Results
+## Smoke Test結果
 
 2026-08-23のone-seed run:
 
@@ -206,20 +214,20 @@ MPLCONFIGDIR=/tmp/world-model-mpl .venv/bin/python \
 
 `outputs/integrated_rollout.png`は、同一の視界外開始位置から右Goalと下Goalへ別の軌跡を選んだ例を示す。
 
-## Failure Cases
+## 失敗例
 
 初回実装はrisk-aware/mean-onlyとも20/40成功だった。右Goalだけ成功し、下Goalでも右へ進んだ。原因はtask headをposterior featureだけで学習し、計画時には未教師のprior featureへ適用したこと、およびbehavior-policy returnをterminal valueとして使ったことだった。
 
 修正としてtask headを全prior headにも教師あり学習し、value targetを状態距離potentialへ変更した。その後40/40へ改善した。これは「各部品が単体で動く」ことと「利用時の表現上で学習されている」ことが別問題だと示す。
 
-## Findings
+## 分かったこと
 
 - hidden Goalを区別できたmemory表現をplanningまで接続すると、異なる行動を選択できた。
 - posterior/prior interfaceは統合時の主要なfailure boundaryだった。
 - risk penaltyなしでも全成功したため、今回の簡単なin-distribution課題はuncertainty-aware planningの優位性を検証できない。
 - decoderは表現監査には有用だが、plannerはdecoderを使わない。
 
-## Limitations
+## 限界
 
 - one seed、二つの固定Goal、決定論的5x5 Grid Worldだけである。
 - 3本のpriorはencoderとGRUを共有するcorrelated headsであり、bootstrap ensembleより弱いepistemic近似である。
@@ -230,7 +238,7 @@ MPLCONFIGDIR=/tmp/world-model-mpl .venv/bin/python \
 - risk-awareのOOD、安全性、calibration優位性は未証明である。
 - 実機actionは送信していない。
 
-## Compare Later
+## 後で比較すること
 
 - comparison: mean-only対risk-aware、shared-head対bootstrap ensemble、mean rollout対sampled rollout、RSSM対Transformer統合版
 - metrics: OOD success、calibration、collision/unsafe proposal率、latency、memory、long-horizon error
@@ -238,7 +246,7 @@ MPLCONFIGDIR=/tmp/world-model-mpl .venv/bin/python \
 - expected weakness: correlated ensembleとpotential-based valueによる過信・task特化
 - ablations: KL、overshooting、goal loss、prior task supervision、value terminal、uncertainty penalty、decoder
 
-## Final Model Candidate
+## 統合モデル候補としての判断
 
 ```text
 Candidate:
@@ -260,7 +268,7 @@ Transformer memory requires a different state/cache interface; object slots and 
 would replace rather than simply append to the vector encoder; actor learning may exploit model error.
 ```
 
-## Next Questions
+## 次の問い
 
 - stochastic/OOD環境でrisk penaltyは成功率や安全性を改善するか。
 - bootstrapされた独立RSSM ensembleはcorrelated prior headsよりcalibrationが良いか。
@@ -268,7 +276,7 @@ would replace rather than simply append to the vector encoder; actor learning ma
 - continuationをplanner return maskへ組み込むとterminal behaviorは改善するか。
 - Physical AI接続前に、action guardへ速度・workspace・dead-man制約をどう統合するか。
 
-## References
+## 参考文献
 
 ### Learning Latent Dynamics for Planning from Pixels (PlaNet)
 

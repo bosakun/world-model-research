@@ -1,4 +1,4 @@
-# World Model Research
+# World Model研究
 
 論文で提案されてきたWorld Modelの主要な機構を、小さく再現可能な実験として一つずつ理解・実装し、最後に実験結果を根拠として統合する研究リポジトリです。
 
@@ -22,7 +22,7 @@ Guarded Action
 
 単に「コードが動く」ことを完了条件にしていません。各実験には数式とコードの対応、各lossの役割、部品を除去した場合の影響、失敗例、元論文との差分を記録しています。
 
-## Current Status
+## 現在の状態
 
 2026-08-23時点で、MemoryからPhysical AI、統一評価、統合World Modelまでの一気通貫フェーズが完了しています。
 
@@ -35,7 +35,30 @@ Guarded Action
 
 進捗の詳細は[RESEARCH_ROADMAP.md](RESEARCH_ROADMAP.md)、論文の状態と出典は[PAPERS.md](PAPERS.md)で管理しています。
 
-## Integrated World Model
+## 初めて読む方へ
+
+このリポジトリでは、難しい言葉を次のように考えると読み進めやすくなります。
+
+| 言葉 | まずはこう捉える |
+|---|---|
+| Observation（観測） | Agentがカメラなどから実際に受け取る情報。世界全体ではない場合がある。 |
+| State（状態） | 本当の世界の情報。環境内部は持っていても、Agentには見えないことがある。 |
+| Latent `z` | 画像をそのまま扱わず、重要な情報を小さな数値ベクトルに圧縮した表現。 |
+| Memory / hidden state `h` | 過去の観測とactionを要約して持つ内部メモ。 |
+| World Model | 「この状態でこのactionをしたら、次に何が起きるか」を予測するmodel。 |
+| Prior / Posterior | 画像を見る前の予測 / 画像を見た後に修正した推論。 |
+| Rollout / Imagination | model内部だけで未来を何stepも予測すること。 |
+| Planning | 未来をいくつか想像し、良さそうなactionを選ぶこと。 |
+
+最初はすべてを理解する必要はありません。次の順で読むと、部品が必要になる理由を段階的に追えます。
+
+1. [`03_memory/01_gru`](03_memory/01_gru/README.md): まず過去を覚えるGRUを作る。
+2. [`03_memory/02_partial_observation`](03_memory/02_partial_observation/README.md): なぜ現在画像だけでは足りないのかを体験する。
+3. [`03_memory/03_rssm`](03_memory/03_rssm/README.md): prior/posteriorとKLを導入する。
+4. [`90_evaluation/01_memory_benchmark`](90_evaluation/01_memory_benchmark/README.md): 同じ条件で比較して採否を決める。
+5. [`99_integrated_world_model`](99_integrated_world_model/01_evidence_selected/README.md): 有効だった部品を接続する。
+
+## 統合World Model
 
 Phase 99では、過去の実験で有効性または必要性を確認できた機構を選択して統合しました。「実装したものを全部入れる」のではなく、失敗した機構や現在の課題に不要な機構は保留しています。
 
@@ -81,9 +104,9 @@ previous z + action ── GRUCell ── h_t
 
 ![Integrated World Model rollout](99_integrated_world_model/01_evidence_selected/outputs/integrated_rollout.png)
 
-## Key Results
+## 主な結果
 
-### Memory comparison
+### Memoryの比較
 
 Partial Observation環境では、同じ現在観測でも過去に見たGoalが異なるpaired aliasを作りました。現在frameだけを使うモデルはGoalを区別できず、memory modelは履歴を利用できました。
 
@@ -98,7 +121,7 @@ Partial Observation環境では、同じ現在観測でも過去に見たGoalが
 
 ![Memory benchmark](90_evaluation/01_memory_benchmark/outputs/memory_comparison.png)
 
-### End-to-end planning
+### 入力から行動までをつないだplanning
 
 Goalを視界外へ隠した後のclosed-loop navigationで、次の結果を得ました。
 
@@ -109,7 +132,7 @@ Goalを視界外へ隠した後のclosed-loop navigationで、次の結果を得
 
 両方式が全成功したため、この簡単なin-distribution環境ではrisk penaltyの優位性は示されていません。OOD、transition noise、hazardを含む環境での検証が必要です。
 
-### Results kept as failures
+### 失敗結果として残したもの
 
 期待と異なる結果も削除せず、次の研究課題として保存しています。
 
@@ -121,28 +144,28 @@ Goalを視界外へ隠した後のclosed-loop navigationで、次の結果を得
 
 これらは「低いloss」「動くrollout」「高い再構成精度」が、意味のある表現や安全な制御を自動的に保証しないことを示しています。
 
-## Research Phases
+## 研究フェーズ
 
-| Phase | Topic | Experiments | Status |
+| Phase | テーマ | 実験 | 状態 |
 |---:|---|---|---|
-| 01 | Basic Dynamics | 監査時に旧実装を確認できず | Not Started |
-| 02 | Visual Latent | 監査時に旧実装を確認できず | Not Started |
-| 03 | Memory | GRU、Partial Observation、RSSM、Transformer | Completed |
-| 04 | Uncertainty | Probabilistic Dynamics、Ensemble、PETS-style rollout | Completed |
-| 05 | Long Horizon | Latent Overshooting、Temporal Abstraction | Completed |
-| 06 | Reward / Value | Reward、Value、Continuation heads | Completed |
-| 07 | Planning | Random Shooting、CEM、MPC、Latent Planning | Completed |
-| 08 | Imagination RL | Latent Actor-Critic、Dreamer family study | Completed |
-| 09 | Spatial Representation | C-SWM、Slot Attention、SlotFormer、3D Occupancy | Completed |
-| 10 | Video World Model | VQ tokenizer、Latent Action、Heterogeneous Simulator | Completed |
-| 11 | Multimodal | Vision、Proprioception、Language、Touch fusion | Completed |
-| 12 | Physical AI | Action-conditioned JEPA、Robot Interface | Completed |
-| 90 | Evaluation | Unified Memory Benchmark、System Registry | Completed |
-| 99 | Integration | Evidence-selected Integrated World Model | Completed |
+| 01 | 基本ダイナミクス | 監査時に旧実装を確認できず | 未着手 |
+| 02 | 視覚latent | 監査時に旧実装を確認できず | 未着手 |
+| 03 | Memory | GRU、部分観測、RSSM、Transformer | 完了 |
+| 04 | 不確実性 | Probabilistic Dynamics、Ensemble、PETS-style rollout | 完了 |
+| 05 | 長期予測 | Latent Overshooting、Temporal Abstraction | 完了 |
+| 06 | Reward / Value | Reward、Value、Continuation head | 完了 |
+| 07 | Planning | Random Shooting、CEM、MPC、Latent Planning | 完了 |
+| 08 | Imagination RL | Latent Actor-Critic、Dreamer系の資料 | 完了 |
+| 09 | 空間表現 | C-SWM、Slot Attention、SlotFormer、3D Occupancy | 完了 |
+| 10 | Video World Model | VQ tokenizer、Latent Action、Simulator | 完了 |
+| 11 | Multimodal | Vision、Proprioception、Language、Touchの統合 | 完了 |
+| 12 | Physical AI | Action-conditioned JEPA、Robot Interface | 完了 |
+| 90 | 評価 | 統一Memory比較、System Registry | 完了 |
+| 99 | 統合 | 根拠に基づく統合World Model | 完了 |
 
 Phase 01/02を「実装済み」としていない理由は[REPOSITORY_AUDIT.md](REPOSITORY_AUDIT.md)に記録しています。後から旧コードが見つかった場合も、既存実験を上書きせず独立比較します。
 
-## Repository Structure
+## リポジトリ構造
 
 ```text
 world-model-research/
@@ -179,9 +202,9 @@ experiment/
 └── tests/             # shape、forward、gradient、finite-value等
 ```
 
-## Getting Started
+## はじめ方
 
-### Requirements
+### 必要な環境
 
 - Python 3.11–3.13
 - PyTorch 2.4+
@@ -189,7 +212,7 @@ experiment/
 - Matplotlib 3.9+
 - `uv` recommended
 
-### Setup
+### セットアップ
 
 ```bash
 git clone https://github.com/bosakun/world-model-research.git
@@ -199,7 +222,7 @@ uv sync
 
 既存の仮想環境を使う場合は、`pyproject.toml`の依存関係を任意のPython環境へインストールしても構いません。
 
-### Run all tests
+### 全testを実行する
 
 ```bash
 uv run pytest -q
@@ -211,7 +234,7 @@ uv run pytest -q
 131 passed
 ```
 
-### Train and evaluate the integrated model
+### 統合モデルを学習・評価する
 
 ```bash
 MPLCONFIGDIR=/tmp/world-model-mpl uv run \
@@ -223,7 +246,7 @@ MPLCONFIGDIR=/tmp/world-model-mpl uv run \
 
 checkpointは`outputs/checkpoint.pt`へ生成されます。サイズの大きなcheckpointはGitで追跡せず、metrics、training history、plotを追跡しています。
 
-### Rebuild the evaluation registry
+### 評価Registryを再生成する
 
 ```bash
 MPLCONFIGDIR=/tmp/world-model-mpl uv run \
@@ -236,7 +259,7 @@ MPLCONFIGDIR=/tmp/world-model-mpl uv run \
 - `experiment_registry.csv`: compact index
 - `evaluation_coverage.png`: phase別の評価artifact数
 
-## How to Read an Experiment
+## 実験の読み方
 
 初めて読む場合は次の順序を推奨します。
 
@@ -249,7 +272,7 @@ MPLCONFIGDIR=/tmp/world-model-mpl uv run \
 
 RSSMから始める場合は[03_memory/03_rssm/UNDERSTANDING.md](03_memory/03_rssm/UNDERSTANDING.md)、プロジェクト全体の結論から始める場合は[Phase 99のREADME](99_integrated_world_model/01_evidence_selected/README.md)が入口です。
 
-## Research Principles
+## 研究の原則
 
 - 論文由来の機構と独自変更を混同しない。
 - 本質的な複雑さを削らず、責務ごとに理解可能な構造へ分ける。
@@ -259,7 +282,7 @@ RSSMから始める場合は[03_memory/03_rssm/UNDERSTANDING.md](03_memory/03_rs
 - 仮説と異なる結果、collapse、model exploitationも研究結果として残す。
 - 統合時は実装済み機構を全部採用せず、比較結果から選択する。
 
-## Reproducibility and Scope
+## 再現性と適用範囲
 
 多くの実験は、重要機構を理解するための小規模な`Simplified educational implementation`です。巨大な論文モデルの完全再現ではありません。各READMEのReferencesに、次を明記しています。
 
@@ -279,7 +302,7 @@ RSSMから始める場合は[03_memory/03_rssm/UNDERSTANDING.md](03_memory/03_rs
 
 したがって、ここでの結果をそのまま実世界の性能・安全性へ一般化することはできません。
 
-## Paper Lineage
+## 論文の系譜
 
 主な研究系譜：
 
@@ -296,7 +319,7 @@ RSSMから始める場合は[03_memory/03_rssm/UNDERSTANDING.md](03_memory/03_rs
 
 正確な著者、年、primary URL、実装状態は[PAPERS.md](PAPERS.md)を参照してください。
 
-## Next Research Questions
+## 次の研究課題
 
 - OOD Goal、障害物、transition noiseを導入するとrisk-aware MPCは有利になるか。
 - shared prior headsを独立bootstrap RSSM ensembleへ変更するとcalibrationは改善するか。

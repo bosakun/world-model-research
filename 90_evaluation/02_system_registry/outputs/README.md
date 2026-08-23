@@ -1,3 +1,11 @@
-# Generated outputs
+# 生成物
 
-`build_registry.py` writes a machine-readable registry of every evaluation artifact and a phase coverage plot. Heterogeneous task metrics are catalogued, not ranked as if directly comparable.
+- `experiment_registry.json`: 全raw metricsとmetadataを保つ台帳。
+- `experiment_registry.csv`: 検索しやすいcompact index。
+- `evaluation_coverage.png`: phaseごとの評価artifact数。
+
+再生成:
+
+```bash
+uv run python 90_evaluation/02_system_registry/build_registry.py
+```

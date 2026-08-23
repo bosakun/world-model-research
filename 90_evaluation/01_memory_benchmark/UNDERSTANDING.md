@@ -1,51 +1,44 @@
-# Understanding the Unified Memory Comparison
+# Memory比較を理解する
 
-## What problem does this solve?
+## なぜ比較が必要か
 
-It distinguishes “predicts common pixels” from “retains hidden world state,” while keeping dataset/training/evaluation differences from masquerading as architecture effects.
+modelが複雑になると「きっと良くなった」と思いやすい。しかし別dataset、別seed、別lossで得た数値は比較できない。本benchmarkは、条件を揃えて「履歴が必要なときに、どのmemoryが役に立つか」を測る。
 
-## Before / After / Core Idea
+## 主指標: Alias Goal Accuracy
 
-Before, every model had its own smoke test. After, all models receive the same aliases and losses. Evaluate a variable that identical current images cannot reveal, then erase memory and require the advantage to disappear.
+paired dataでは、現在画像がbitwise同一でもhidden Goalはright/downの二通りある。現在frameだけしか使わないmodelは同じ入力に対し二つの正解を出せないため、均等なら最大でも0.5である。
 
-## Data Flow
+```text
+current image A == current image B
+hidden Goal A != hidden Goal B
+```
 
-`paired histories -> equal current observation/different Goal -> two observed context transitions -> ten imagined steps -> pixel and hidden-Goal metrics -> memory ablation`.
+0.5を超えるには、以前に見たGoalとaction履歴を利用しなければならない。画像MSEよりもmemory仮説へ直接対応した指標である。
 
-## Mathematics
+## Memory Ablation
 
-Conditional alias accuracy measures `P(y_hat=y | o_t(pair0)=o_t(pair1))`; a current-frame function cannot systematically exceed 0.5 on balanced contradictory labels. Memory can because histories differ before aliasing.
+- GRU: hiddenをresetする。
+- RSSM: deterministicとstochastic stateをresetする。
+- Transformer: historyを最後の1 tokenだけにする。
 
-Mean/std across seeds exposes stability. Horizon MSE measures compounding visual error. Parameter bytes=`4*parameter_count` is only model-weight storage. Latency measures repeated batch-16 rollout on this machine.
+memoryが本当に使われているなら、この操作でaccuracyは落ちる。実際に全modelが0.5へ戻った。
 
-## Code Mapping
+## 結果をどう読むか
 
-`alias_mask` proves equality from tensors; each `rollout` consumes exactly the same context/actions; `ablate=True` removes the architecture's information carrier; aggregation never averages different model tasks.
+- No Memory 0.5: expected。現在画像だけでは区別不能。
+- GRU 0.833 ± 0.236: memoryは使えたが、1 seedで学習に失敗した。
+- RSSM / Transformer 1.0: この小規模taskでは3 seedすべてでGoalを保持した。
+- 画像MSE: Goal memoryとは別の能力。RSSMがGoalを覚えてもh10画像MSEで最良とは限らない。
+- latency: RSSMはTransformerより速いが、No Memoryよりは遅い。性能とコストは同時に見る。
 
-## Important Components
+## 説明できるようになる確認項目
 
-Paired aliases create an identifiable need for memory. Shared Goal readouts must access equivalent memory states. Multiple seeds prevent one lucky initialization. Ablation establishes mechanism dependence. Raw per-seed CSV prevents mean-only storytelling.
+- なぜ画像MSEだけでmemoryの有効性を判断できないか。
+- paired aliasがNo Memoryの上限を0.5にする理由。
+- ablationで0.5へ戻ることが何を示すか。
+- GRUの平均accuracyだけで採用できない理由。
+- RSSMとTransformerの採否が、accuracyだけでなくlatencyとinterfaceにも依存する理由。
 
-## What happens if we remove it?
+## 限界
 
-- Alias conditioning: pixel accuracy can hide memory failure.
-- Multiple seeds: GRU would appear either perfect or useless depending on seed.
-- Memory ablation: correlation cannot establish use.
-- Matched readout: visually constrained latent unfairly suppresses GRU/Transformer memory.
-- Horizon metrics: one-step quality hides compounding error.
-- Raw results: aggregate claims cannot be audited.
-
-## What I Should Be Able to Explain
-
-- Why must No Memory be at chance on balanced aliases?
-- Why did the initial Goal-head placement make comparison unfair?
-- Why does similar image MSE not imply similar world state?
-- What does the ablation establish?
-- Why is GRU mean 0.833 with large std?
-- Why are parameter bytes not peak memory usage?
-
-## Questions
-
-- Would a frozen probe replace Goal-supervised training more cleanly?
-- How many seeds are needed for GRU failure probability?
-- Does memory quality improve downstream planning success?
+この結果は「すべての環境でRSSMが最良」という証拠ではない。小さく決定論的な2-Goal環境、3 seed、auxiliary Goal label上での結果である。長いcontext、noise、control success、real-world observationでは再評価が必要である。

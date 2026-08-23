@@ -1,69 +1,36 @@
-# Cross-Phase Evaluation Registry
+# フェーズ横断の評価Registry
 
-Status: completed on 2026-08-23. Evidence catalog, not a leaderboard.
+状態: 完了（2026-08-23）。これは順位表ではなく、実験結果を見失わないための台帳である。
 
-## Purpose
+## 目的
 
-Make every generated evaluation artifact discoverable with dataset version, seed, entry point, and raw metrics while preventing incomparable tasks from being ranked together.
+各experimentが出した評価artifactを、dataset version、seed、実行入口、raw metricsとともに一覧化する。segmentation IoU、planning success、robot success、pixel MSEのように意味も単位も違う値を、無理に一つの点数へまとめない。
 
-## Problem / Previous Model / Hypothesis
-
-Results were distributed across experiment folders. A registry should expose coverage and missing evidence without flattening uncertainty calibration, planning return, segmentation IoU, and robot success into one false scalar.
-
-## Architecture / Data Flow
+## 仕組み
 
 ```text
-repository/**/outputs/evaluation_metrics.json
- -> validate metadata -> preserve complete payload
- -> experiment_registry.json + flat CSV + phase coverage plot
+各experimentの outputs/evaluation_metrics.json
+  -> metadataを読む
+  -> 元のpayloadを保ったJSON registry
+  -> 見やすいCSVとphase別coverage図
 ```
 
-## Tensor Shapes / Mathematics
+model tensorやtraining lossは扱わない。registryの1行は「評価を実行できるexperiment」であり、phaseの件数はquality scoreではない。
 
-No model tensors. Registry rows are experiments. Numeric metrics remain keyed dictionaries. Phase counts are `count(executable evaluation artifacts)` and are not quality scores.
+## コード・実行・結果
 
-## Code Mapping
-
-Discovery/metadata extraction: `build_registry.py::discover`; serialization/plot: `build`. Source fixes added dataset/entry metadata to legacy GRU and three planning outputs.
-
-## Training / Losses
-
-None. This is read-only aggregation over local evidence.
-
-## Evaluation Interface
-
-`python 90_evaluation/02_system_registry/build_registry.py` currently catalogs 24 experiments across Phases 03–12 and 99. Phase 90's matched benchmark is stored separately because its artifact aggregates 12 runs rather than one experiment metric file.
-
-## Smoke Test Results
-
-Two tests passed: required cross-phase artifacts are found, and every registered row now records dataset version and evaluation entry point.
-
-## Results / Findings
-
-Coverage: Memory 3, Uncertainty 2, Long Horizon 2, Reward/Value 1, Planning 4, Imagination 1, Spatial 4, Video 3, Multimodal 1, Physical AI 2, Integrated 1. The registry makes one-seed evidence visibly distinct from the matched three-seed memory benchmark.
-
-## Failure Cases / Limitations
-
-Artifact presence is not correctness. Metric names/units are heterogeneous. Checkpoints are ignored by Git and must be regenerated. Parameter bytes are not peak memory. Registry excludes training-only outputs without evaluation JSON.
-
-## Compare Later
-
-Use task-specific protocols. Do not compare voxel IoU numerically against planning success or reward RMSE.
-
-## Final Model Candidate
-
-```text
-Candidate: Yes as research infrastructure.
-Reason: Traceability is required for evidence-based integration.
-Advantages: auditable provenance; machine-readable coverage.
-Disadvantages: cannot standardize fundamentally different tasks.
-Possible conflicts: schema evolution requires registry versioning.
+```bash
+uv run python 90_evaluation/02_system_registry/build_registry.py
 ```
 
-## Next Questions
+- discovery / metadata extraction: `build_registry.py::discover`
+- JSON/CSV/plot生成: `build_registry.py::build`
+- tests: required artifactと必須metadataを確認。
 
-How should future OOD and physical evaluations upgrade Phase 99's one-seed evidence?
+24件を登録した。内訳はMemory 3、Uncertainty 2、Long Horizon 2、Reward/Value 1、Planning 4、Imagination 1、Spatial 4、Video 3、Multimodal 1、Physical AI 2、Integrated 1である。
 
-## References
+## 限界と使い方
 
-No algorithm is implemented. Metrics retain references in their originating experiment README.
+artifactがあることは正しさ・優位性の証明ではない。多くはone-seed smoke resultで、matched multi-seed evidenceはMemory benchmarkだけである。checkpointはGit対象外で再生成が必要。parameter bytesはpeak memoryではない。
+
+この台帳は「どの結果を、どの条件で、どのscriptから再現するか」を辿るために使う。異なるtaskの数値をランキングしない。

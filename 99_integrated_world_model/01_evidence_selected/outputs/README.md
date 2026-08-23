@@ -1,3 +1,3 @@
-# Generated outputs
+# 生成物
 
-Training writes the integrated checkpoint/loss history. Evaluation writes risk-aware versus mean-only MPC results and closed-loop paths. Checkpoints are ignored by Git.
+学習は統合checkpointとloss履歴を出力する。評価はrisk-aware MPCとmean-only MPCの結果、closed-loop経路を出力する。checkpointは再生成可能なbinaryのためGit対象外である。

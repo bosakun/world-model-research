@@ -1,4 +1,4 @@
-# Research Notes
+# 研究ノート: 統合World Model
 
 ## 実装前の疑問
 
@@ -97,7 +97,7 @@
 - mean rollout/particle rollout
 - distance potential/Monte Carlo return/TD value
 
-## Reproducibility record
+## 再現情報
 
 - date: 2026-08-23
 - seed: 331
