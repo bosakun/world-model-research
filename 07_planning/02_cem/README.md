@@ -1,103 +1,33 @@
-# Cross-Entropy Method (CEM) Planning
+# CEM Planning: 良いaction候補の周りを探す
 
-Status: completed on 2026-08-22. Exact compact-model planner smoke test; not a PlaNet/PETS benchmark reproduction.
+このREADMEは日本語で実験の目的・構造・確認結果を読む入口です。英語の技術原文（全数式、Tensor shape、実行条件、出典）は [README_TECHNICAL_EN.md](README_TECHNICAL_EN.md) に保存しています。UNDERSTANDING.mdを先に読んでから戻ると、実験記録を追いやすくなります。
 
-## Purpose
+## Purpose / Problem
 
-Concentrate a Gaussian action-sequence proposal around elite predicted returns instead of spending every sample uniformly.
+Random Shootingは良い候補を見つけても、その周辺を次に重点探索できません。
 
-## Problem
+## Core Idea / Data Flow
 
-Random shooting wastes samples in low-return regions and returned a limited improvement. CEM iteratively uses good candidates to update where the next candidates come from.
+高得点のelite action列の平均と分散から、次のsampling分布を更新します。
 
-## Previous Model
+## Architecture and Training
 
-`01_random_shooting` uses a proposal that never learns from candidate scores during a planning call.
+sample -> elite選択 -> 分布更新を数回繰り返し、最後に最良列の先頭actionを実行します。
 
-## Hypothesis
+実行コマンド、random seed、dataset version、parameter数、checkpoint形式、詳細なloss式、Tensor shape、smoke-test数値は [README_TECHNICAL_EN.md](README_TECHNICAL_EN.md) にそのまま残しています。対応する実装は、このフォルダの model、dataset、losses、train、evaluate、tests です。
 
-Five elite-refit iterations should contract action standard deviation and find a stronger path with fewer candidates per iteration than the random-shooting smoke run.
+## Evaluation
 
-## Architecture
-
-```text
-initialize mu=0,sigma=1
- -> sample 512 sequences
- -> exact model return
- -> top 64 elites
- -> refit/smooth mu,sigma
- -> repeat 5 times
- -> return best sequence seen
-```
-
-## Data Flow
-
-Each iteration converts predicted returns into elite indices and then into the next proposal mean and standard deviation.
-
-## Tensor Shapes
-
-Samples `[512,10,2]`, scores `[512]`, elites `[64,10,2]`, mean/std `[10,2]`, iteration best `[5]`.
-
-## Mathematics
-
-```text
-E=TopK({a_n},J(a_n)); mu_new=mean(E); sigma_new=std(E)
-mu <- alpha mu +(1-alpha)mu_new; sigma similarly, alpha=0.1.
-```
-
-## Code Mapping
-
-Distribution iteration: `cem.py::CEMPlanner.plan`; rollout objective: `../planning_core.py`; evidence: `evaluate.py`.
-
-## Training
-
-CEM has no learned weights. Its optimization iterations refit a proposal distribution online.
-
-## Losses
-
-There is no supervised loss; predicted return is the objective maximized by elite selection.
-
-## Evaluation Interface
-
-`python 07_planning/02_cem/evaluate.py` emits hyperparameters, per-iteration best scores, final proposal std, distance reduction, and plot.
-
-## Smoke Test Results
-
-Four tests passed. Distance `2.2672 -> 0.6069` (73.2% reduction), selected score `-11.866`, mean action std contracted to `0.272`. Raw iteration best was not monotonic (`-13.651` then `-13.721`) because each finite sample set differs; global best is retained.
-
-## Failure Cases
-
-- Gaussian proposal is unimodal and may collapse to one mode.
-- Finite-sample iteration quality need not improve monotonically.
-- Hard action clipping distorts the fitted Gaussian near bounds.
-- Open-loop CEM still cannot correct execution/model error.
-
-## Findings
-
-Elite refitting concentrates search effectively on this smooth exact task.
+一つの見栄えのよい例だけで判断せず、forward pass、rollout、loss、task固有の指標、failure caseを確認します。outputsフォルダには学習・評価で作った図と数値を保存しています。
 
 ## Limitations
 
-There is no learned-model uncertainty, warm start, constraints, or comparison-controlled model-call accounting yet.
-
-## Compare Later
-
-Matched random shooting/CEM budgets; elite fraction, iterations, momentum, horizon, initialization/policy prior. Metrics: return, success, evaluations, latency, sensitivity to model bias.
+modelの誤りを高得点として最適化する危険があり、elite数や分散下限が結果を左右します。
 
 ## Final Model Candidate
 
-```text
-Candidate: Yes for continuous-action planning.
-Reason: Strong derivative-free refinement with a simple world-model interface.
-Advantages: sample concentration, bounded compute, no model gradients required.
-Disadvantages: unimodal proposal, hyperparameters, local convergence.
-Possible conflicts: ensemble particles multiply every candidate evaluation.
-```
-
-## Next Questions
-
-How much does executing only the first action and replanning improve robustness? How should uncertainty/risk modify elite scores?
+この段階の結果はsmoke testです。本格比較、複数seed、ablation、他方式との採否判断は90_evaluationで行います。
 
 ## References
 
-PlaNet: Danijar Hafner et al., 2018, https://arxiv.org/abs/1811.04551. PETS: Kurtland Chua et al., 2018, https://arxiv.org/abs/1805.12114. Used for online CEM planning/trajectory-sampling context. This is a simplified exact-model implementation without learned latent dynamics or benchmark reproduction.
+対応論文、採用した機構、原実装との差分は [README_TECHNICAL_EN.md](README_TECHNICAL_EN.md) のReferencesを参照してください。ここでの実装は、論文の完全再現ではなく理解のための小規模実装である場合があります。

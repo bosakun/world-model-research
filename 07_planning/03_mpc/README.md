@@ -1,97 +1,33 @@
-# Receding-Horizon Model Predictive Control (MPC)
+# MPC: 観測するたびに計画を立て直す
 
-Status: completed on 2026-08-22. CEM-based exact-model MPC smoke test.
+このREADMEは日本語で実験の目的・構造・確認結果を読む入口です。英語の技術原文（全数式、Tensor shape、実行条件、出典）は [README_TECHNICAL_EN.md](README_TECHNICAL_EN.md) に保存しています。UNDERSTANDING.mdを先に読んでから戻ると、実験記録を追いやすくなります。
 
-## Purpose
+## Purpose / Problem
 
-Execute only the first action of a planned sequence, observe the resulting state, and replan. This closes the loop between world-model planning and the physical/environment state.
+一度決めた長いaction列は、途中で予測が外れても修正できません。
 
-## Problem
+## Core Idea / Data Flow
 
-Random shooting and one-shot CEM produce open-loop sequences. Any disturbance or model error after the first step invalidates later actions.
+planning後に最初のactionだけ実行し、本物の次観測から再びplanningします。
 
-## Previous Model
+## Architecture and Training
 
-`02_cem` returns a complete action sequence but does not itself decide how much of it to execute before updating state.
+random shootingまたはCEMをreceding horizonで繰り返し、open-loopと比較します。
 
-## Hypothesis
+実行コマンド、random seed、dataset version、parameter数、checkpoint形式、詳細なloss式、Tensor shape、smoke-test数値は [README_TECHNICAL_EN.md](README_TECHNICAL_EN.md) にそのまま残しています。対応する実装は、このフォルダの model、dataset、losses、train、evaluate、tests です。
 
-Repeated CEM planning with updated state should reach the Goal while retaining a finite planning horizon.
+## Evaluation
 
-## Architecture
-
-```text
-observe s_t -> CEM plan H=8 -> execute first action only
-     ^                                  |
-     +--------- environment s_{t+1} ----+
-repeat until terminal or 20 steps
-```
-
-## Data Flow
-
-An environment observation starts each planning call; one executed action produces the next observation and closes the loop.
-
-## Tensor Shapes
-
-Per plan: candidates `[256,8,2]`; execution result states `[executed+1,4]`, actions/rewards/plan scores `[executed,...]`.
-
-## Mathematics
-
-At time `t`, optimize `a_{t:t+H-1}`, execute `a_t*`, discard the remaining suffix, then solve again from observed `s_{t+1}`. This is receding-horizon control.
-
-## Code Mapping
-
-Loop/first-action execution: `mpc.py::RecedingHorizonMPC.run`; optimizer: `../02_cem/cem.py`; environment/model: `../planning_core.py`; metrics: `evaluate.py`.
-
-## Training
-
-No planner training. Each environment step performs four CEM refits. Exact dynamics isolate the replanning mechanism.
-
-## Losses
-
-There is no supervised loss; predicted return is optimized online.
-
-## Evaluation Interface
-
-`python 07_planning/03_mpc/evaluate.py` records success, executed steps/replanning calls, distances, reward, model/search configuration, and executed path.
-
-## Smoke Test Results
-
-Three tests passed. MPC reached the Goal in 12 executed actions/replanning calls; distance `2.2672 -> 0.00065`.
-
-## Failure Cases
-
-- Replanning multiplies inference cost and latency.
-- Exact-model result does not measure robustness to learned-model bias.
-- Short horizon can be myopic; terminal value quality becomes important.
-- No action smoothness, collision, or real-time constraint.
-
-## Findings
-
-MPC establishes the Observation→Plan→Action→Environment feedback loop.
+一つの見栄えのよい例だけで判断せず、forward pass、rollout、loss、task固有の指標、failure caseを確認します。outputsフォルダには学習・評価で作った図と数値を保存しています。
 
 ## Limitations
 
-It can correct state after each executed action, but current success occurs under deterministic exact dynamics.
-
-## Compare Later
-
-Open-loop versus MPC under injected disturbances and learned-model errors; horizon/replan frequency/warm start. Metrics: success, reward, planning calls, latency, corrections, safety violations.
+毎stepの計算が必要で、modelが大きいと実時間制御が難しくなります。
 
 ## Final Model Candidate
 
-```text
-Candidate: Yes for deployment-facing planning.
-Reason: Feedback is essential when models/environments are imperfect.
-Advantages: state feedback, finite horizon, planner-agnostic wrapper.
-Disadvantages: repeated compute and latency, terminal-value dependence.
-Possible conflicts: large video/ensemble models may not meet control deadlines.
-```
-
-## Next Questions
-
-How does MPC behave with learned dynamics uncertainty, disturbances, and value error? When should a fast policy replace online planning?
+この段階の結果はsmoke testです。本格比較、複数seed、ablation、他方式との採否判断は90_evaluationで行います。
 
 ## References
 
-PETS: Kurtland Chua et al., 2018, https://arxiv.org/abs/1805.12114. TD-MPC2: Nicklas Hansen, Hao Su, Xiaolong Wang, 2023, https://arxiv.org/abs/2310.16828. Used for receding-horizon learned-model planning context. This implementation is an exact-model educational MPC loop, not either system reproduction.
+対応論文、採用した機構、原実装との差分は [README_TECHNICAL_EN.md](README_TECHNICAL_EN.md) のReferencesを参照してください。ここでの実装は、論文の完全再現ではなく理解のための小規模実装である場合があります。
