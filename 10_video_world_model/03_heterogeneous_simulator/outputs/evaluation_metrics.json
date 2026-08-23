@@ -1,0 +1,11 @@
+{
+  "dataset_version": "heterogeneous-square-controls-v1",
+  "seed": 239,
+  "mse_by_source": {
+    "motor": 0.013999705202877522,
+    "language": 0.01416711788624525,
+    "goal": 0.014265657402575016
+  },
+  "max_source_mse": 0.014265657402575016,
+  "evaluation_entry_point": "python 10_video_world_model/03_heterogeneous_simulator/evaluate.py"
+}

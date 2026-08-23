@@ -82,11 +82,11 @@ Adding a GRU hidden state creates a valid mechanism for retaining trajectory his
 
 - **Completed** — `01_vq_video_tokenizer`: VQ frame tokens, straight-through training, reconstruction, and codebook-collapse diagnostics
 - **Completed (failed semantic alignment)** — `02_latent_action_dynamics`: hard latent-action bottleneck and token rollout; dynamics learned but action permutation accuracy remained 0.270
-- **Implementing** — `03_heterogeneous_simulator`: heterogeneous conditional generation (UniSim mechanism study)
+- **Completed** — `03_heterogeneous_simulator`: typed motor/language/goal adapters into a shared conditional image simulator with source-stratified evaluation
 
 ## 11 Multimodal
 
-- **Not Started** — Language-conditioned state and dynamics
+- **Implementing** — `01_multimodal_fusion`: simultaneous vision, proprioception, language, and touch fusion with missing-modality masks
 - **Not Started** — Cross-modal alignment and grounding
 
 ## 12 Physical AI

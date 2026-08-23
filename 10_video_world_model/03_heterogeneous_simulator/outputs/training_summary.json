@@ -1,0 +1,21 @@
+{
+  "seed": 239,
+  "dataset_version": "heterogeneous-square-controls-v1",
+  "image_size": 16,
+  "condition_dim": 16,
+  "latent_dim": 32,
+  "train_samples": 1536,
+  "validation_samples": 384,
+  "batch_size": 64,
+  "epochs": 50,
+  "learning_rate": 0.0008,
+  "foreground_weight": 6.0,
+  "optimizer": "Adam",
+  "training_steps": 1200,
+  "parameter_count": 56739,
+  "epoch": 50,
+  "train_loss": 0.037236773719390236,
+  "validation_motor": 0.037056487053632736,
+  "validation_language": 0.03746001049876213,
+  "validation_goal": 0.03768176957964897
+}
