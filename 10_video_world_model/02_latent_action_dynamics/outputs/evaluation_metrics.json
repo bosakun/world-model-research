@@ -1,0 +1,32 @@
+{
+  "dataset_version": "vq-moving-square-pairs-v2",
+  "seed": 223,
+  "latent_to_true_action_permutation": [
+    4,
+    3,
+    0,
+    2,
+    1
+  ],
+  "permutation_action_accuracy": 0.26953125,
+  "next_token_accuracy": 0.8297363519668579,
+  "changed_token_accuracy": 0.7865439653396606,
+  "copy_current_token_accuracy": 0.7771972417831421,
+  "changed_token_fraction": 0.22280272841453552,
+  "latent_action_usage": [
+    270,
+    188,
+    274,
+    368,
+    180
+  ],
+  "rollout_token_accuracy_by_frame": [
+    1.0,
+    0.6875,
+    0.6875,
+    0.625,
+    0.6875,
+    0.5625
+  ],
+  "evaluation_entry_point": "python 10_video_world_model/02_latent_action_dynamics/evaluate.py"
+}
