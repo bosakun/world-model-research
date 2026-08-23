@@ -1,0 +1,10 @@
+{
+  "all_position_rmse": 0.032276302576065063,
+  "no_vision_position_rmse": 0.037369709461927414,
+  "no_proprio_position_rmse": 0.5306780338287354,
+  "no_language_position_rmse": 0.11488918960094452,
+  "no_touch_position_rmse": 0.03513461351394653,
+  "dataset_version": "multimodal-navigation-v1",
+  "seed": 251,
+  "evaluation_entry_point": "python 11_multimodal/01_multimodal_fusion/evaluate.py"
+}

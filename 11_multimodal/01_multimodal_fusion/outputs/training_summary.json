@@ -1,0 +1,23 @@
+{
+  "seed": 251,
+  "dataset_version": "multimodal-navigation-v1",
+  "model_dim": 48,
+  "heads": 4,
+  "layers": 2,
+  "train_samples": 1536,
+  "validation_samples": 384,
+  "batch_size": 64,
+  "epochs": 50,
+  "learning_rate": 0.0008,
+  "missing_probability": 0.2,
+  "image_weight": 0.5,
+  "optimizer": "Adam",
+  "training_steps": 1200,
+  "parameter_count": 108925,
+  "train_total": 0.010006676544435322,
+  "train_position": 0.0036585347649330893,
+  "train_image": 0.012696283481394252,
+  "validation_total": 0.01021716371178627,
+  "validation_position": 0.003869065083563328,
+  "validation_image": 0.01269619818776846
+}

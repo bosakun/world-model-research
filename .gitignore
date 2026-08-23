@@ -20,3 +20,4 @@ __pycache__/
 10_video_world_model/01_vq_video_tokenizer/outputs/checkpoint.pt
 10_video_world_model/02_latent_action_dynamics/outputs/checkpoint.pt
 10_video_world_model/03_heterogeneous_simulator/outputs/checkpoint.pt
+11_multimodal/01_multimodal_fusion/outputs/checkpoint.pt

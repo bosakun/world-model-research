@@ -86,12 +86,12 @@ Adding a GRU hidden state creates a valid mechanism for retaining trajectory his
 
 ## 11 Multimodal
 
-- **Implementing** — `01_multimodal_fusion`: simultaneous vision, proprioception, language, and touch fusion with missing-modality masks
-- **Not Started** — Cross-modal alignment and grounding
+- **Completed** — `01_multimodal_fusion`: typed vision/proprio/language/touch tokens, explicit missingness, shared future grounding, and modality ablations
+- **Completed (within 01)** — Cross-modal grounding through shared next-state/image targets; dedicated contrastive alignment deferred
 
 ## 12 Physical AI
 
-- **Not Started** — Action-conditioned predictive representation
+- **Implementing** — `01_action_conditioned_jepa`: action-conditioned predictive representation for noisy physical trajectories
 - **Not Started** — Robot and autonomous-driving transfer (V-JEPA 2, DayDreamer, OccWorld)
 
 ## 90 Evaluation
