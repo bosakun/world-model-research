@@ -1,6 +1,6 @@
-# はじめにここから: 世界モデルを自分で作って理解するための道案内
+# はじめにここから: 03 Memoryを自分で作って理解するための道案内
 
-このリポジトリは、論文を再現するためだけのものではありません。目的は、**自分で小さな世界モデルを作りながら、「世界を予測するmodelとは何か」を理解すること**です。
+このページは`03_memory/`を学ぶための入口です。目的は、**自分で小さな世界モデルを作りながら、「過去を覚えると何が変わるのか」を理解すること**です。
 
 最初から論文、数式、巨大なmodelを理解する必要はありません。まずは、次の一文を自分の言葉で言えれば十分です。
 
@@ -35,7 +35,7 @@ Agentが右へ動く
 
 ### Lesson 1: 未来を予測するとは何か
 
-[03_memory/01_gru/README.md](03_memory/01_gru/README.md)を読みます。
+[01_gru/README.md](01_gru/README.md)を読みます。
 
 ここでは「今の画像」と「右へ行くaction」から「次の画像」を当てます。最初の目標は、`z`やGRUを理解することではなく、**inputとoutputが何か**を言えるようになることです。
 
@@ -43,17 +43,17 @@ Agentが右へ動く
 今の画像 + action -> 次の画像
 ```
 
-次に[01_gruのUNDERSTANDING.md](03_memory/01_gru/UNDERSTANDING.md)を読みます。
+次に[01_gruのUNDERSTANDING.md](01_gru/UNDERSTANDING.md)を読みます。
 
 ### Lesson 2: なぜ過去を覚える必要があるか
 
-[03_memory/02_partial_observation/README.md](03_memory/02_partial_observation/README.md)を読み、`outputs/aliasing_pair.png`を見ます。
+[02_partial_observation/README.md](02_partial_observation/README.md)を読み、`outputs/aliasing_pair.png`を見ます。
 
 ここで初めて、**同じ現在画像なのに、正しい答えが二通りある**状況が出ます。これがmemoryを導入する理由です。
 
 ### Lesson 3: 画像を見る前と見た後を分ける
 
-[03_memory/03_rssm/README.md](03_memory/03_rssm/README.md)を読みます。
+[03_rssm/README.md](03_rssm/README.md)を読みます。
 
 RSSMで重要なのは一つです。
 
@@ -67,22 +67,24 @@ RSSMで重要なのは一つです。
 
 ### Lesson 4: 過去を1個のメモにするか、全部並べて参照するか
 
-[03_memory/04_transformer_memory/README.md](03_memory/04_transformer_memory/README.md)を読みます。
+[04_transformer_memory/README.md](04_transformer_memory/README.md)を読みます。
 
 - GRU: 過去を1冊のメモ帳へ要約する。
 - Transformer: 過去のページを並べ、必要なページを探す。
 
 この比喩で違いが分かれば、attentionの式は後回しで大丈夫です。
 
-### Lesson 5: 本当に良くなったかを調べる
+## 03 Memoryを学び終えたら
 
-[90_evaluation/01_memory_benchmark/README.md](90_evaluation/01_memory_benchmark/README.md)を読みます。
+### 次: 本当に良くなったかを調べる
+
+[90_evaluation/01_memory_benchmark/README.md](../90_evaluation/01_memory_benchmark/README.md)を読みます。
 
 ここでは「複雑なmodelだから良い」と決めず、同じ条件で比べます。
 
 ### Lesson 6: 部品をつないでAgentが行動するまで
 
-[99_integrated_world_model/01_evidence_selected/README.md](99_integrated_world_model/01_evidence_selected/README.md)を読みます。
+[99_integrated_world_model/01_evidence_selected/README.md](../99_integrated_world_model/01_evidence_selected/README.md)を読みます。
 
 最後に、画像を見て、過去を覚え、未来を想像し、actionを選ぶところまでつなげます。
 
@@ -109,7 +111,7 @@ RSSMで重要なのは一つです。
 
 ## 実際に動かしてみる
 
-最初のLessonは次で確認できます。
+最初のLessonは、リポジトリのルートで次を実行して確認できます。
 
 ```bash
 uv run pytest -q 03_memory/01_gru/tests
