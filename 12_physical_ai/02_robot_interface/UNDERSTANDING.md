@@ -1,48 +1,26 @@
-# Understanding the Robot Boundary
+# 学習modelと実機の間に必要な境界
 
-## What problem does this solve?
+## 何が困るのか
 
-It separates untrusted learned action requests from physical execution and defines exactly what experience is recorded for learning.
+学習modelは範囲外の数値や危険なactionを出すことがあります。その出力を直接robotへ送ると、人や機械を傷つける危険があります。
 
-## Before / After / Core Idea
+## robot interfaceの流れ
 
-Before, model code called transitions directly. After, every action crosses deterministic safety checks and every transition has provenance/order. Safety is an external invariant, not something the policy is expected to learn.
+    modelのaction要求
+    -> 単位・範囲の確認
+    -> 速度・力・位置の制限
+    -> 非常停止の確認
+    -> robotへ実行
+    -> 観測、action、結果を記録
 
-## Data Flow
+このinterfaceは単なる配線ではなく、安全装置と学習記録の境界です。
 
-`observation -> demonstrator/policy -> requested action -> safety filter -> robot -> next observation -> replay`.
+## なぜ記録するか
 
-## Mathematics
+実際に何を観測し、どのactionを出し、何が起きたかを残さなければ、失敗の原因を調べたりworld modelを更新したりできません。
 
-Clipping limits magnitude; dead-man/workspace predicates replace action with zero. Inertial dynamics expose why action does not equal velocity instantly. Imitation MSE estimates demonstration behavior but does not optimize task reward.
+## 自分で説明できるか
 
-## Code Mapping
-
-`SafetyEnvelope.filter` is the actuator gate; `SimulatedMobileRobot.step` is replaceable hardware/simulator behavior; `DemonstrationDataset` records aligned transitions; `ImitationPolicy` is bounded twice; `replay_schema.json` is the data contract.
-
-## Important Components
-
-Dead-man enable, action bounds, workspace guard, immutable executed action in replay, source/episode/step metadata, simulator-first testing, and explicit hardware flag.
-
-## What happens if we remove it?
-
-- Envelope: policy bugs directly reach actuators.
-- Executed-action logging: model trains on requested rather than physical control.
-- Episode/step IDs: sequence boundaries corrupt memory training.
-- Provenance: demonstrations and online actions cannot be audited.
-- Simulator adapter: safety behavior is first tested on hardware.
-- External approval: software success is incorrectly treated as execution authority.
-
-## What I Should Be Able to Explain
-
-- Why bound the policy and filter it again?
-- Why record executed rather than requested action?
-- What does dead-man stop protect?
-- Why is transition-level validation weak?
-- Why does 100% simulator success not authorize hardware?
-
-## Questions
-
-- How are timestamps/sensor delays represented?
-- Which uncertainty threshold triggers emergency stop?
-- How should recovery and operator takeover enter replay?
+- modelのactionを直接実行してはいけない理由は何か。
+- interfaceはどんな制限を確認するか。
+- 実行ログはなぜ必要か。

@@ -1,55 +1,23 @@
-# Understanding Heterogeneous Simulator Data
+# 異なるsimulatorデータを一つのworld modelへつなぐ
 
-## What problem does this solve?
+## 何が困るのか
 
-It gives incompatible condition schemas a typed route into one shared dynamics interface.
+simulatorごとにstate、action、camera、座標の単位が違います。そのまま混ぜると、同じ数字でも意味が違うことがあります。
 
-## Before
+## interfaceの役割
 
-Each experiment assumed one uniform action representation. Combining datasets would make “unused zero” indistinguishable from a real zero action.
+各データについて「何が観測か」「actionは何を意味するか」「単位は何か」を明示し、共通のDynamics interfaceへ変換します。
 
-## After
+    simulator固有の形式
+    -> 型と意味を確認するadapter
+    -> 共通のworld model入力
 
-A source/type variable selects exactly one adapter. The shared simulator always receives the same condition shape, while evaluation remains stratified by source.
+## 注意点
 
-## Core Idea
+形式を揃えるだけでは意味が揃いません。右というactionがカメラ移動なのかロボット移動なのか、座標がmeterなのかpixelなのかを記録する必要があります。
 
-Normalize interfaces, not raw meanings: modality-specific adapters translate each schema; a shared transition learns common consequences; source metadata preserves provenance.
+## 自分で説明できるか
 
-## Data Flow
-
-`source record -> selected adapter + source embedding -> shared condition -> image latent transition -> next image`.
-
-## Mathematics
-
-`c=A_type(input)+e_type` uses a discrete selector, avoiding concatenated dummy fields. `z'=tanh(z+f(z,c))` is shared across sources. Source-specific error `E[L|type=k]` prevents a majority source from hiding failure.
-
-## Code Mapping
-
-`kind` is provenance; `motor/language/goal` are schemas; `condition` stacks then selects adapters; evaluation filters each source independently.
-
-## Important Components
-
-Typed selection prevents unused-field leakage. Shared latent/dynamics enables transfer. Source embedding allows systematic schema offsets. Balanced sampling and per-source metrics expose negative transfer.
-
-## What happens if we remove it?
-
-- Type selector: zeros/defaults become ambiguous.
-- Adapters: incompatible shapes/semantics are forced together.
-- Shared dynamics: no cross-source reuse.
-- Source metrics: one easy/large dataset can hide failure.
-- Provenance embedding: shared semantics are assumed perfectly aligned.
-
-## What I Should Be Able to Explain
-
-- Why is missing input not the same as numerical zero?
-- What does an adapter normalize?
-- Why can source embeddings both help and create shortcuts?
-- Why report worst-source error?
-- How is selection different from simultaneous multimodal fusion?
-
-## Questions
-
-- Can shared semantics emerge when domains/images differ?
-- How should conflicting conditions be reconciled?
-- Which source balancing strategy scales to real corpora?
+- 異なるsimulatorをそのまま混ぜると何が危険か。
+- adapterは何を明示するか。
+- 数字のshapeが同じでも意味が違う例は何か。

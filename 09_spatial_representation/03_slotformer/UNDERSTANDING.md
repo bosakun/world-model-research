@@ -1,63 +1,23 @@
-# Understanding SlotFormer Dynamics
+# SlotFormerで複数物体の未来を予測する
 
-## What problem does this solve?
+## 何が困るのか
 
-It predicts how several entity representations evolve jointly through time while retaining a separate object axis.
+slotごとの表現を作れても、物体は互いに影響します。AgentがGoalへ近づく、物体が衝突する、といった関係を時間の中で扱う必要があります。
 
-## Before
+## SlotFormerの考え方
 
-C-SWM was one-step and Slot Attention addressed within-frame binding. Neither isolated long temporal attention over object histories.
+    時刻ごとの複数slot
+    -> Transformerがslot間と時間方向の関係を見る
+    -> 次の複数slotを予測する
 
-## After
+一つの画像vectorを予測するのでなく、物体らしい表現の集合を予測します。
 
-Every object-frame pair is a token. A causal Transformer can retrieve older motion evidence and model same-frame relations, then recursively predict future slot sets.
+## 注意点
 
-## Core Idea
+attentionを使っても、slotが安定して同じ物体を表す保証はありません。物体数が変わる、見え隠れする、順序が入れ替わる状況を評価する必要があります。
 
-Use time-major slot tokens with a block causal mask: future frames are hidden, but all objects in the current/past frames are visible. This respects temporal causality without inventing an order among simultaneous objects.
+## 自分で説明できるか
 
-## Data Flow
-
-`ordered position slots -> feature/time/slot embeddings -> block-causal attention -> residual next slots -> autoregressive append`.
-
-## Mathematics
-
-`x_tk=W s_tk+e_t+e_k` encodes state, time, and stable synthetic identity.
-
-`M_qp=1` (blocked) only if the key frame is after the query frame. Object index within one frame does not affect visibility.
-
-`s_hat_(t+1)=s_t+g(Transformer(x)_t)` uses a residual to express physical persistence.
-
-`L=mean ||s_hat_(t+1)-s_(t+1)||²` is teacher forced; repeated rollout evaluates the distribution shift created by model outputs.
-
-## Code Mapping
-
-`frame_causal_mask` is causality; `time_embedding`/`slot_embedding` are positional information; `TransformerEncoder` is memory; `rollout` feeds predictions back; evaluation computes each horizon separately.
-
-## Important Components
-
-History is necessary because input omits velocity. Same-frame visibility enables relations. Causality prevents target leakage. Residual prediction exploits smooth motion. Autoregressive evaluation reveals compounding error hidden by teacher forcing.
-
-## What happens if we remove it?
-
-- Time embeddings: frames with similar positions become ambiguous.
-- History: velocity direction cannot be inferred from one position frame.
-- Same-frame attention: interactions become per-object independent.
-- Causal mask: training can copy future evidence.
-- Residual: network relearns absolute position rather than change.
-- Autoregressive test: claimed long-horizon ability rests only on teacher inputs.
-- Stable slot IDs here: swapping input order changes identity tracking; a general pipeline needs matching/equivariance.
-
-## What I Should Be Able to Explain
-
-- Why is ordinary triangular token masking wrong for simultaneous slots?
-- Why do positions require multiple frames to infer velocity?
-- Why can teacher-forced MSE be small while rollout RMSE grows?
-- Which perception problem is deliberately bypassed?
-- How does token count scale with frames and slots?
-
-## Questions
-
-- Can temporal attention itself resolve slot permutation?
-- Would predicting distributions help at collisions?
-- Which multi-step objective best controls compounding slot error?
+- SlotFormerは何を複数のまま保つか。
+- slot間の関係を見る必要がある例は何か。
+- slotが安定しないと何が困るか。

@@ -1,61 +1,26 @@
-# Understanding Latent Actions
+# action記録のない動画から変化を表す
 
-## What problem does this solve?
+## 何が困るのか
 
-It tries to infer “what intervention happened?” from before/after visual states when no action metadata is available.
+多くの動画には「誰がどのactionをしたか」の記録がありません。world modelは通常actionを必要とします。
 
-## Before
+## latent action
 
-Video tokens described appearance but could not be commanded. Supervised planners assumed action labels.
+前後の状態の差から、変化を説明する内部actionを推測します。
 
-## After
+    前の画像 + 後の画像
+    -> latent action
+    前の状態 + latent action
+    -> 後の状態を予測
 
-A discrete bottleneck encodes pairwise change, and token dynamics can be driven by a supplied code. Whether the code equals a human action remains an empirical question.
+latent actionは人間が命名した「右へ移動」などと一致するとは限りません。予測に役立つ変化の符号です。
 
-## Core Idea
+## 注意点
 
-Force future prediction through a small discrete change variable. Use straight-through Gumbel sampling for gradients, confidence to make assignments discrete, and marginal entropy to prevent all pairs sharing one code.
+カメラ移動、照明変化、物体の動きを混同する可能性があります。latent actionが本当に原因を表しているかは、介入や生成結果で確認する必要があります。
 
-## Data Flow
+## 自分で説明できるか
 
-`frames -> frozen VQ IDs -> pair action inference -> hard code -> token Transformer -> next IDs -> recursive decoded video`.
-
-## Mathematics
-
-Gumbel-softmax approximates categorical sampling while `hard=True` uses one-hot forward values and soft gradients backward.
-
-`H(q(a|pair))` should be low for confident assignments; `H(mean_pair q)` should be high for population diversity. These criteria define discreteness/use, not semantics.
-
-Weighted CE emphasizes locations where `token_t != token_t+1`; otherwise background copy dominates.
-
-## Code Mapping
-
-`infer_action` is the bottleneck; `predict` is conditional dynamics; `objective` contains CE/confidence/balance; `best_mapping` acknowledges arbitrary action-code permutation; copy baseline checks triviality.
-
-## Important Components
-
-Frozen tokenizer stabilizes targets; changed-token weights expose motion; hard bottleneck creates interactive controls; balance prevents collapse; permutation evaluation respects label symmetry; rollout tests feedback.
-
-## What happens if we remove it?
-
-- Bottleneck: future encoder can leak unrestricted change.
-- Hard sampling: control is not a discrete interface.
-- Confidence: codes remain mixtures.
-- Balance: all changes may use one code.
-- Changed weights: background copy gives deceptively high accuracy.
-- Permutation matching: arbitrary code names look incorrect.
-- True-action audit: non-semantic partitions remain hidden.
-
-## What I Should Be Able to Explain
-
-- Why are latent action labels only meaningful up to permutation?
-- Why do confidence and balance not guarantee true action recovery?
-- Why was overall token accuracy misleading?
-- How does hard Gumbel preserve gradients?
-- Why does interactive rollout need supplied codes after pair inference training?
-
-## Questions
-
-- Does longer temporal context distinguish motion direction better?
-- What intervention invariance losses are needed?
-- Should latent actions be hierarchical or continuous?
+- なぜ動画だけでは通常のactionがないのか。
+- latent actionは何から推測するか。
+- latent actionを人間のaction名と同一視できない理由は何か。

@@ -1,164 +1,52 @@
-# Understanding Aleatoric Probabilistic Dynamics
+# 不確実さを出せるDynamics Modelを理解する
 
-## What problem does this solve?
+## 何が困るのか
 
-The same state and action can genuinely produce different next states because of process noise, sensor noise, or unobserved factors. A point prediction says only where outcomes average. A probabilistic prediction also says how widely they vary.
+同じstateで同じactionをしても、毎回まったく同じ次stateになるとは限りません。床の滑り方、センサーの誤差、見えていない要因などで結果は少し変わります。
 
-## Before
+MSEだけで学習するmodelは、たくさん起きた結果の平均を一つ出します。しかし「この予測はどれくらいばらつくか」は答えられません。
 
-```text
-(s_t,a_t) -> one next-state estimate
-```
+## 今回足したもの
 
-MSE encourages the conditional mean. It supplies no calibrated transition distribution to sample or score.
+このmodelは次stateを一点ではなく、Gaussian（釣鐘型の分布）として出します。
 
-## After
+    state + action
+    -> 平均 mu: 次stateの中心
+    -> 標準偏差 sigma: どれくらい広がるか
 
-```text
-(s_t,a_t) -> mean mu_{t+1} and variance sigma^2_{t+1}
-          -> distribution p(s_{t+1}|s_t,a_t)
-```
+平均は「どこへ行きそうか」、標準偏差は「どれくらい偶然があるか」です。
 
-The variance changes with input, so the model can say one region/action is intrinsically noisier than another.
+## aleatoric uncertaintyとは
 
-## Core Idea
+これは世界そのものの偶然です。どれだけデータを増やしても、その瞬間のランダムな揺れは完全には当てられません。
 
-Aleatoric uncertainty belongs to the data-generating process. Even a model with perfect parameters cannot predict the exact random noise draw before it happens. The best it can do is learn the conditional outcome distribution.
+この実験では、場所とactionによって本当にノイズ量が変わる環境を作りました。正解のノイズ量は評価用であり、modelへ直接教えてはいません。
 
-Epistemic uncertainty instead describes uncertainty about the model because data are limited. This single probabilistic network is designed to learn aleatoric uncertainty; it cannot reliably separate epistemic uncertainty by itself.
+## NLLは何を学ばせるか
 
-## Data Flow
+Gaussian NLLは次の二つを同時に求めます。
 
-```text
-known state/action
-  -> deterministic action displacement
-  -> unknown Gaussian process-noise draw
-  -> observed next state
+1. 平均を正解へ近づける。
+2. ばらつきを正直に出す。
 
-model(state,action)
-  -> mean + log variance
-  -> NLL against observed next state
-  -> calibrated Gaussian prediction
-  -> mean rollout OR sampled rollout
-```
+外れたのに小さいsigmaを出すと強く罰されます。反対に、いつでも大きいsigmaを出して逃げても罰されます。そのため、当たりやすい場所では狭く、偶然が大きい場所では広く予測するよう学びます。
 
-## Mathematics
+## rolloutで何が変わるか
 
-### Environment transition
+平均だけを使うrolloutは毎回同じ一本道です。Gaussianからsampleすると、未来は複数の候補へ広がります。
 
-```text
-s_{t+1}=s_t+delta(a_t)+epsilon_t
-epsilon_t~N(0,diag(sigma_true(s_t,a_t)^2)).
-```
+    平均rollout: もっとも中心的な未来
+    sample rollout: 起こりうる複数の未来
 
-`sigma_true` increases horizontally as `x` increases, and vertical actions have greater vertical noise. Why needed: known heteroscedastic ground truth makes it possible to test whether learned uncertainty means what we claim.
+## 外すとどうなるか
 
-### Predicted distribution
+- variance headを外す: 一点予測へ戻り、危険な広がりを表せない。
+- NLLをMSEだけにする: 平均は学べても、適切なsigmaを学べない。
+- sampleしない: 長期で広がる偶然が見えない。
 
-```text
-p_theta(s_{t+1}|s_t,a_t)=N(mu_theta,diag(exp(l_theta)))
-```
+## 自分で説明できるか
 
-- `mu_theta`: learned next-state mean.
-- `l_theta=log sigma^2`: learned log variance.
-
-Why log variance: it maps a wide positive variance range to unconstrained real outputs and makes NLL numerically convenient.
-
-### Soft variance bounds
-
-```text
-l_upper = l_max - softplus(l_max-l_raw)
-l = l_min + softplus(l_upper-l_min).
-```
-
-Why needed: it maintains differentiable upper/lower bounds and avoids variance underflow/overflow. The bound values themselves remain trainable.
-
-### Gaussian negative log-likelihood
-
-```text
-NLL = 1/2 sum_j [l_j + (y_j-mu_j)^2/exp(l_j) + log(2pi)].
-```
-
-- residual term divided by variance: being wrong is penalized more when claiming confidence.
-- log-variance term: claiming large uncertainty everywhere is penalized.
-
-Why needed: these opposing pressures jointly learn accuracy and appropriate spread.
-
-### Reparameterized sample
-
-```text
-epsilon~N(0,I)
-y_hat=mu+exp(l/2) epsilon.
-```
-
-Why needed: it creates trajectory particles and remains differentiable when later objectives backpropagate through samples.
-
-### Coverage
-
-```text
-coverage(k) = fraction(|y-mu| <= k sigma).
-```
-
-For a calibrated Gaussian, reference values are about 68.3% at `k=1` and 95.4% at `k=2`. Coverage alone is insufficient: an extremely wide distribution can cover everything but be uninformative, so sharpness/NLL also matter.
-
-## Code Mapping
-
-| Concept | Code |
-|---|---|
-| true input-dependent noise | `stochastic_dataset.py::transition_noise_std` |
-| stochastic environment | `stochastic_transition` |
-| mean/logvar prediction | `probabilistic_dynamics.py::ProbabilisticDynamics.forward` |
-| positive std/variance | `GaussianPrediction.std`, `.variance` |
-| sampling | `GaussianPrediction.sample` |
-| NLL | `probabilistic_losses.py::diagonal_gaussian_nll` |
-| sequence propagation | `ProbabilisticDynamics.rollout` |
-| coverage/correlation | `evaluate.py::evaluate` |
-
-## Important Components
-
-### Separate mean and variance heads
-
-Why necessary: transition location and transition randomness are different quantities. One deterministic head cannot state both.
-
-### Input-dependent variance
-
-Why necessary: homoscedastic variance would report the same risk everywhere and miss state/action-specific noise.
-
-### NLL instead of variance regression
-
-Why necessary: in real tasks true variance labels are unavailable. NLL learns variance from repeated residual statistics. Here true variance is used only to verify the result.
-
-### Sampled rollout
-
-Why necessary: applying only conditional means hides distribution growth through time. Particles reveal possible trajectory spread.
-
-## What happens if we remove it?
-
-- Remove variance head: returns to point dynamics; no likelihood or risk-aware samples.
-- Fix one global variance: cannot learn heteroscedastic regions/actions.
-- Remove `log variance` term from NLL: model can inflate variance without cost.
-- Remove residual/variance scaling: variance no longer controls claimed confidence.
-- Remove bounds: optimization can encounter extremely tiny/large variance and unstable division/exponentiation.
-- Always use mean rollout: aleatoric risk disappears from imagined trajectories.
-- Call variance “epistemic”: conceptually wrong; extra data cannot remove the actual transition noise.
-
-## What I Should Be Able to Explain
-
-- What is the difference between aleatoric and epistemic uncertainty?
-- Why can repeated identical inputs have different next states?
-- Why does MSE learn a mean but not a distribution?
-- How does each Gaussian NLL term prevent cheating?
-- Why predict log variance instead of raw standard deviation?
-- Why can continuous Gaussian NLL be negative?
-- What does 1σ coverage measure, and what can it hide?
-- Why is a predicted/true std correlation possible only because this environment is synthetic?
-- Why does sampled rollout spread while mean rollout is repeatable?
-- Why does the curve's OOD divergence motivate an ensemble rather than merely a larger variance head?
-
-## Questions
-
-- How should non-Gaussian or multimodal transition noise be modeled?
-- Does diagonal covariance miss important coupled physical motion?
-- How many repeated outcomes are needed to distinguish noise from mean-model error?
-- How should aleatoric variance combine with ensemble disagreement mathematically?
-- Which trajectory-sampling scheme preserves the two uncertainty types over long horizons?
+- MSEが平均を出しやすいのはなぜか。
+- muとsigmaはそれぞれ何を表すか。
+- aleatoric uncertaintyは、データを増やすとなくなるか。
+- 平均rolloutとsample rolloutは何が違うか。

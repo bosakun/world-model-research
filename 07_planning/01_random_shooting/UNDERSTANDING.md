@@ -1,44 +1,23 @@
-# Understanding Random Shooting
+# Random Shootingを理解する
 
-## What problem does this solve?
+## 何をするか
 
-It converts model predictions into a finite optimization problem over sampled action sequences.
+実行前に、ランダムなaction列をたくさん作り、world modelで未来を予測して最も高いscoreの列を選びます。
 
-## Before / After / Core Idea
+    候補をランダムに作る
+    -> 未来を想像して採点
+    -> 一番良い候補の最初のactionを実行
 
-Before: model answers “what if this action sequence?” After: sample many “what ifs,” score them, and choose the best observed candidate. There is no gradient and no guarantee of global optimality.
+## なぜ必要か
 
-## Data Flow / Mathematics
+world modelは「このactionなら未来はこうなる」を予測できます。Random Shootingは、その予測を使って行動を選ぶ一番単純な方法です。
 
-```text
-a^(n)_0:H ~ Uniform -> rollout model -> J_n -> n*=argmax J_n.
-```
+## 弱点
 
-`J` includes discounted rewards and a terminal value so a short horizon values progress beyond its last explicit reward.
+候補が少ないと良いaction列を引けません。actionの種類や計画時間が増えるほど、ランダムに当てるのは難しくなります。
 
-## Code Mapping
+## 自分で説明できるか
 
-Sampling/selection: `random_shooting.py`. Rollout/score: `planning_core.py`. Evidence: `evaluate.py`.
-
-## Important Components
-
-- candidate diversity explores alternatives;
-- terminal value reduces horizon truncation bias;
-- continuation stops post-terminal accumulation;
-- fixed seed makes smoke evidence reproducible.
-
-## What happens if we remove it?
-
-Without reward/value, sequences cannot be ranked. Without action bounds, samples may be invalid. Without enough candidates, good narrow regions are missed. Without replanning, errors persist.
-
-## What I Should Be Able to Explain
-
-- Why does random shooting scale poorly with horizon?
-- What is scored, and why include terminal value?
-- Why is selected score better than mean candidate score?
-- Why does this smoke model use exact dynamics?
-- Why is one seed not a comparison?
-
-## Questions
-
-How should sampling distributions incorporate policy priors, uncertainty penalties, and hard constraints?
+- Random Shootingは何をrandomに作るか。
+- なぜ最初のactionだけ実行することが多いか。
+- candidate数を増やすと何が増えるか。

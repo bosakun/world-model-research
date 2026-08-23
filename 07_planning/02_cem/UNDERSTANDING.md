@@ -1,41 +1,24 @@
-# Understanding CEM Planning
+# CEMで良いaction候補を絞り込む
 
-## What problem does this solve?
+## Random Shootingの次の問題
 
-CEM uses high-scoring samples to learn where to sample next within one planning call.
+ランダム探索では、良いaction列の近くに候補があっても、次の試行でその近くへ集中できません。
 
-## Before / After / Core Idea
+## CEMの流れ
 
-Random shooting has a fixed uniform proposal. CEM repeatedly refits a Gaussian to elite action sequences, converting sparse successful samples into a denser next search distribution.
+    広く候補をsampleする
+    -> scoreの高い少数の候補を残す
+    -> 残した候補の分布を調べる
+    -> その近くから次の候補をsampleする
 
-## Data Flow / Mathematics
+これを数回繰り返し、良いaction列の周辺を絞ります。
 
-```text
-q_i(a)=N(mu_i,sigma_i) -> samples -> returns -> elites -> q_{i+1}.
-```
+## 何に注意するか
 
-Momentum smooths refits; a std floor prevents immediate zero exploration.
+CEMはworld modelが高得点だと予測する場所へ進みます。world modelの誤りを利用するactionを見つける危険もあります。候補数、繰り返し回数、上位何個を残すかが結果に影響します。
 
-## Code Mapping
+## 自分で説明できるか
 
-`cem.py::CEMPlanner` implements sampling/top-k/refit/global-best retention. `planning_core.py` scores sequences.
-
-## Important Components
-
-Elite fraction controls selectivity; multiple iterations create refinement; action bounds keep controls valid; global-best retention protects against a worse later random batch.
-
-## What happens if we remove it?
-
-No refit becomes random shooting. Too few elites causes noisy collapse; too many dilute selection. Zero variance floor can freeze search. No global best can return a worse final sample.
-
-## What I Should Be Able to Explain
-
-- What distribution is being optimized?
-- Why can raw best score decrease between iterations?
-- Why is CEM derivative-free?
-- What does elite fraction trade off?
-- Why does Gaussian unimodality matter?
-
-## Questions
-
-Can mixture proposals, policy priors, or uncertainty-aware scores prevent bad local convergence?
+- CEMはRandom Shootingのどの弱点を補うか。
+- elite candidateとは何か。
+- なぜmodel誤差があると危険か。

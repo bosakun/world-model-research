@@ -1,39 +1,24 @@
-# Understanding MPC
+# MPCはなぜ計画を作り直すのか
 
-## What problem does this solve?
+## 一度の長い計画の問題
 
-It turns open-loop planning into feedback control by replanning after observing each executed transition.
+world modelの未来予測には誤差があります。最初に10stepのaction列を決めて全部実行すると、途中で予測が外れても修正できません。
 
-## Before / After / Core Idea
+## MPCの流れ
 
-Before: plan once and trust all H actions. After: optimize H actions, use only the first, observe, and optimize again. The discarded suffix still matters because it informed the first action.
+    現在から未来を計画する
+    -> 最初のactionだけ実行する
+    -> 本物の次の観測を受け取る
+    -> その観測からもう一度計画する
 
-## Data Flow / Mathematics
+これをreceding horizon controlとも呼びます。
 
-```text
-a*_{t:t+H}=argmax J(s_t,a); execute a*_t; receive s_{t+1}; repeat.
-```
+## なぜ有効か
 
-## Code Mapping
+本物の観測を毎step取り直すことで、world modelの予測誤差を修正できます。ただし毎stepでplanningするので計算量は増えます。
 
-MPC loop: `mpc.py`. Inner CEM: `../02_cem/cem.py`. True feedback state: `planning_core.py::PointWorldEnvironment`.
+## 自分で説明できるか
 
-## Important Components
-
-Fresh state observation corrects drift; first-action-only execution preserves feedback; terminal check stops replanning; horizon/terminal value balance short and long concerns.
-
-## What happens if we remove it?
-
-Execute full plan becomes open-loop control. Replan without observing actual state repeats the same error. No terminal stop wastes actions after success.
-
-## What I Should Be Able to Explain
-
-- Why optimize actions that will be discarded?
-- How does MPC handle model error, and what can it not fix?
-- Why is replanning costly?
-- What does terminal value do for a short horizon?
-- Why is exact-model success only a smoke result?
-
-## Questions
-
-How should warm starts, adaptive horizons, uncertainty penalties, and real-time budgets be integrated?
+- open-loop計画とは何か。
+- MPCで最初のactionだけ実行する理由は何か。
+- MPCでもworld modelが悪すぎると困る理由は何か。
