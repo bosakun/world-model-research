@@ -62,6 +62,23 @@ Guarded Action
 4. [`90_evaluation/01_memory_benchmark`](90_evaluation/01_memory_benchmark/README.md): 同じ条件で比較して採否を決める。
 5. [`99_integrated_world_model`](99_integrated_world_model/01_evidence_selected/README.md): 有効だった部品を接続する。
 
+## 日本語の学習ガイドと記事
+
+各フェーズの技術記録に入る前に、まず次の日本語ガイドを読んでください。数式や論文名を暗記するより、「前のモデルの何が足りず、今回何を足すのか」を追うための入口です。
+
+| フェーズ | はじめのガイド | まとめ記事 |
+|---|---|---|
+| 03 Memory | [START_HERE](03_memory/START_HERE.md) | [ARTICLE](03_memory/ARTICLE.md) |
+| 04 Uncertainty | [START_HERE](04_uncertainty/START_HERE.md) | [ARTICLE](04_uncertainty/ARTICLE.md) |
+| 05 Long Horizon | [START_HERE](05_long_horizon/START_HERE.md) | [ARTICLE](05_long_horizon/ARTICLE.md) |
+| 06 Reward / Value | [START_HERE](06_reward_value/START_HERE.md) | [ARTICLE](06_reward_value/ARTICLE.md) |
+| 07 Planning | [START_HERE](07_planning/START_HERE.md) | [ARTICLE](07_planning/ARTICLE.md) |
+| 08 Imagination RL | [START_HERE](08_imagination_rl/START_HERE.md) | [ARTICLE](08_imagination_rl/ARTICLE.md) |
+| 09 Spatial Representation | [START_HERE](09_spatial_representation/START_HERE.md) | [ARTICLE](09_spatial_representation/ARTICLE.md) |
+| 10 Video World Model | [START_HERE](10_video_world_model/START_HERE.md) | [ARTICLE](10_video_world_model/ARTICLE.md) |
+| 11 Multimodal | [START_HERE](11_multimodal/START_HERE.md) | [ARTICLE](11_multimodal/ARTICLE.md) |
+| 12 Physical AI | [START_HERE](12_physical_ai/START_HERE.md) | [ARTICLE](12_physical_ai/ARTICLE.md) |
+
 ## 統合World Model
 
 Phase 99では、過去の実験で有効性または必要性を確認できた機構を選択して統合しました。「実装したものを全部入れる」のではなく、失敗した機構や現在の課題に不要な機構は保留しています。
