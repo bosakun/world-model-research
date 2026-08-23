@@ -1,6 +1,6 @@
 # Paper Registry
 
-Last updated: 2026-08-22
+Last updated: 2026-08-23
 
 Statuses: `Not Read`, `Overview Read`, `Reading`, `Deep Read`, `Implemented`, `Re-read Needed`.
 
@@ -29,13 +29,13 @@ The year below follows the first public paper/proceedings record. Metadata and U
 
 | Status | Paper | Authors | Year | Primary source | Roadmap relevance |
 |---|---|---|---:|---|---|
-| Implemented | Learning Latent Dynamics for Planning from Pixels (PlaNet) | Danijar Hafner, Timothy Lillicrap, Ian Fischer, Ruben Villegas, David Ha, Honglak Lee, James Davidson | 2018 | https://arxiv.org/abs/1811.04551 | Simplified continuous RSSM core in `03_memory/03_rssm`; reward, planning, and overshooting remain unimplemented |
+| Implemented | Learning Latent Dynamics for Planning from Pixels (PlaNet) | Danijar Hafner, Timothy Lillicrap, Ian Fischer, Ruben Villegas, David Ha, Honglak Lee, James Davidson | 2018 | https://arxiv.org/abs/1811.04551 | Continuous RSSM core in `03_memory/03_rssm`, overshooting in Phase 05, and evidence-selected RSSM planning integration in Phase 99; all are simplified educational implementations |
 
 ## Imagination
 
 | Status | Paper | Authors | Year | Primary source | Roadmap relevance |
 |---|---|---|---:|---|---|
-| Implemented | Dream to Control: Learning Behaviors by Latent Imagination | Danijar Hafner, Timothy Lillicrap, Jimmy Ba, Mohammad Norouzi | 2019 | https://arxiv.org/abs/1912.01603 | Simplified differentiable latent imagination, λ-return actor/critic, and target critic in `08_imagination_rl/01_actor_critic`; not full Dreamer |
+| Implemented | Dream to Control: Learning Behaviors by Latent Imagination | Danijar Hafner, Timothy Lillicrap, Jimmy Ba, Mohammad Norouzi | 2019 | https://arxiv.org/abs/1912.01603 | Simplified differentiable latent imagination in Phase 08; reward/value latent imagination also informs the Phase 99 MPC integration; neither is full Dreamer |
 | Overview Read | Mastering Atari with Discrete World Models (DreamerV2) | Danijar Hafner, Timothy Lillicrap, Mohammad Norouzi, Jimmy Ba | 2020 | https://arxiv.org/abs/2010.02193 | Discrete latent and behavior-learning differences documented in Phase 08; categorical state not implemented |
 | Overview Read | Mastering Diverse Domains through World Models (DreamerV3) | Danijar Hafner, Jurgis Pasukonis, Jimmy Ba, Timothy Lillicrap | 2023 | https://arxiv.org/abs/2301.04104 | Cross-domain stability mechanisms documented in Phase 08; robust full algorithm not implemented |
 
@@ -43,7 +43,7 @@ The year below follows the first public paper/proceedings record. Metadata and U
 
 | Status | Paper | Authors | Year | Primary source | Roadmap relevance |
 |---|---|---|---:|---|---|
-| Implemented | Deep Reinforcement Learning in a Handful of Trials using Probabilistic Dynamics Models (PETS) | Kurtland Chua, Roberto Calandra, Rowan McAllister, Sergey Levine | 2018 | https://arxiv.org/abs/1805.12114 | Simplified probabilistic ensemble and TS1/TS∞ rollout in `04_uncertainty`; CEM/control benchmarks remain for Phase 07 |
+| Implemented | Deep Reinforcement Learning in a Handful of Trials using Probabilistic Dynamics Models (PETS) | Kurtland Chua, Roberto Calandra, Rowan McAllister, Sergey Levine | 2018 | https://arxiv.org/abs/1805.12114 | Simplified probabilistic ensemble and TS1/TS∞ rollout in Phase 04, planning in Phase 07, and correlated-prior risk-aware MPC in Phase 99; not a PETS reproduction |
 | Implemented | What Uncertainties Do We Need in Bayesian Deep Learning for Computer Vision? | Alex Kendall, Yarin Gal | 2017 | https://arxiv.org/abs/1703.04977 | Aleatoric/epistemic distinction and heteroscedastic likelihood experiment in `04_uncertainty/01_probabilistic_dynamics` |
 
 ## Planning
@@ -87,5 +87,5 @@ The year below follows the first public paper/proceedings record. Metadata and U
 | Status | Paper | Authors | Year | Primary source | Roadmap relevance |
 |---|---|---|---:|---|---|
 | Implemented | V-JEPA 2: Self-Supervised Video Models Enable Understanding, Prediction and Planning | Mido Assran et al. | 2025 | https://arxiv.org/abs/2506.09985 | Simplified action-conditioned JEPA with EMA target and anti-collapse diagnostics in `12_physical_ai/01_action_conditioned_jepa`; not a video/robot reproduction |
-| Implemented | DayDreamer: World Models for Physical Robot Learning | Philipp Wu, Alejandro Escontrela, Danijar Hafner, Ken Goldberg, Pieter Abbeel | 2022 | https://arxiv.org/abs/2206.14176 | Physical replay/interface motivation in `12_physical_ai/02_robot_interface`; simplified offline simulator experiment, not online Dreamer or robot reproduction |
+| Implemented | DayDreamer: World Models for Physical Robot Learning | Philipp Wu, Alejandro Escontrela, Danijar Hafner, Ken Goldberg, Pieter Abbeel | 2022 | https://arxiv.org/abs/2206.14176 | Physical replay/interface motivation in Phase 12 and action-boundary separation in Phase 99; simplified local simulator work, not online Dreamer or robot reproduction |
 | Implemented | OccWorld: Learning a 3D Occupancy World Model for Autonomous Driving | Wenzhao Zheng, Weiliang Chen, Yuanhui Huang, Borui Zhang, Yueqi Duan, Jiwen Lu | 2023 | https://arxiv.org/abs/2311.16038 | Compact binary-voxel future occupancy mechanism in `09_spatial_representation/04_occupancy_3d`; not an autonomous-driving reproduction |

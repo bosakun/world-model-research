@@ -24,3 +24,4 @@ __pycache__/
 12_physical_ai/01_action_conditioned_jepa/outputs/checkpoint.pt
 12_physical_ai/02_robot_interface/outputs/checkpoint.pt
 90_evaluation/01_memory_benchmark/outputs/checkpoints/
+99_integrated_world_model/01_evidence_selected/outputs/checkpoint.pt

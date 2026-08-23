@@ -1,0 +1,11 @@
+{
+  "dataset_version": "integrated-partial-navigation-v1",
+  "seed": 331,
+  "episodes_per_variant": 40,
+  "risk_aware_success_rate": 1.0,
+  "mean_only_success_rate": 1.0,
+  "risk_aware_mean_steps": 3.0,
+  "risk_aware_mean_epistemic_std": 0.44965999697645503,
+  "external_actions_sent": false,
+  "evaluation_entry_point": "python 99_integrated_world_model/01_evidence_selected/evaluate.py"
+}

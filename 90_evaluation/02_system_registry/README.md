@@ -32,7 +32,7 @@ None. This is read-only aggregation over local evidence.
 
 ## Evaluation Interface
 
-`python 90_evaluation/02_system_registry/build_registry.py` currently catalogs 23 experiments across Phases 03–12. Phase 90's matched benchmark is stored separately because its artifact aggregates 12 runs rather than one experiment metric file.
+`python 90_evaluation/02_system_registry/build_registry.py` currently catalogs 24 experiments across Phases 03–12 and 99. Phase 90's matched benchmark is stored separately because its artifact aggregates 12 runs rather than one experiment metric file.
 
 ## Smoke Test Results
 
@@ -40,7 +40,7 @@ Two tests passed: required cross-phase artifacts are found, and every registered
 
 ## Results / Findings
 
-Coverage: Memory 3, Uncertainty 2, Long Horizon 2, Reward/Value 1, Planning 4, Imagination 1, Spatial 4, Video 3, Multimodal 1, Physical AI 2. The registry makes one-seed evidence visibly distinct from the matched three-seed memory benchmark.
+Coverage: Memory 3, Uncertainty 2, Long Horizon 2, Reward/Value 1, Planning 4, Imagination 1, Spatial 4, Video 3, Multimodal 1, Physical AI 2, Integrated 1. The registry makes one-seed evidence visibly distinct from the matched three-seed memory benchmark.
 
 ## Failure Cases / Limitations
 
@@ -62,7 +62,7 @@ Possible conflicts: schema evolution requires registry versioning.
 
 ## Next Questions
 
-Which evidence is strong enough to justify each Phase 99 component, and which remains undecided?
+How should future OOD and physical evaluations upgrade Phase 99's one-seed evidence?
 
 ## References
 

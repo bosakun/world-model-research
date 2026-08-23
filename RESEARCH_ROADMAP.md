@@ -1,6 +1,6 @@
 # World Model Research Roadmap
 
-Last updated: 2026-08-22
+Last updated: 2026-08-23
 
 Statuses: `Not Started`, `Reading`, `Implementing`, `Evaluating`, `Completed`, `Needs Re-evaluation`.
 
@@ -103,6 +103,7 @@ Adding a GRU hidden state creates a valid mechanism for retaining trajectory his
 
 ## 99 Integrated World Model
 
-- **Implementing** — Select components from controlled comparisons and record evidence strength
-- **Not Started** — Integrate perception, memory, dynamics, uncertainty, imagination, reward/value, and planning
-- **Not Started** — End-to-end smoke test and evidence-based component decision record
+- **Completed** — `01_evidence_selected`: evidence-selected CNN/RSSM belief, correlated prior ensemble, overshooting, reward/value/continuation/goal heads, and risk-aware discrete MPC
+- **Completed** — End-to-end partial-observation filtering, prior imagination, guarded action, and replanning loop (one-seed smoke run; both risk-aware and mean-only 40/40)
+- **Completed** — Component decision record distinguishes adopted, held, and rejected mechanisms; risk-aware superiority remains unproven and is explicitly deferred to OOD evaluation
+- **Completed** — Repository-wide regression suite: 131 tests passed; cross-phase registry: 24 executable evaluation artifacts

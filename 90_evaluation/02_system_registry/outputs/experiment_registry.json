@@ -1,6 +1,6 @@
 {
   "registry_version": 1,
-  "experiment_count": 23,
+  "experiment_count": 24,
   "phase_counts": {
     "03_memory": 3,
     "04_uncertainty": 2,
@@ -11,7 +11,8 @@
     "09_spatial_representation": 4,
     "10_video_world_model": 3,
     "11_multimodal": 1,
-    "12_physical_ai": 2
+    "12_physical_ai": 2,
+    "99_integrated_world_model": 1
   },
   "experiments": [
     {
@@ -677,6 +678,25 @@
         "safety_clip_count": 0,
         "external_hardware_commands_sent": false,
         "evaluation_entry_point": "python 12_physical_ai/02_robot_interface/evaluate.py"
+      }
+    },
+    {
+      "phase": "99_integrated_world_model",
+      "experiment": "99_integrated_world_model/01_evidence_selected",
+      "metrics_path": "99_integrated_world_model/01_evidence_selected/outputs/evaluation_metrics.json",
+      "dataset_version": "integrated-partial-navigation-v1",
+      "seed": 331,
+      "evaluation_entry_point": "python 99_integrated_world_model/01_evidence_selected/evaluate.py",
+      "metrics": {
+        "dataset_version": "integrated-partial-navigation-v1",
+        "seed": 331,
+        "episodes_per_variant": 40,
+        "risk_aware_success_rate": 1.0,
+        "mean_only_success_rate": 1.0,
+        "risk_aware_mean_steps": 3.0,
+        "risk_aware_mean_epistemic_std": 0.44965999697645503,
+        "external_actions_sent": false,
+        "evaluation_entry_point": "python 99_integrated_world_model/01_evidence_selected/evaluate.py"
       }
     }
   ],

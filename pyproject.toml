@@ -13,6 +13,18 @@ dependencies = [
 dev = ["pytest>=8,<10"]
 
 [tool.pytest.ini_options]
-testpaths = ["03_memory/01_gru/tests"]
+testpaths = [
+  "03_memory",
+  "04_uncertainty",
+  "05_long_horizon",
+  "06_reward_value",
+  "07_planning",
+  "08_imagination_rl",
+  "09_spatial_representation",
+  "10_video_world_model",
+  "11_multimodal",
+  "12_physical_ai",
+  "90_evaluation",
+  "99_integrated_world_model",
+]
 addopts = "-ra"
-
