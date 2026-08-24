@@ -87,16 +87,61 @@ ensembleでは、全体の不確実さを次のように考えます。
 
 データを増やすとepistemicは減ることが期待されます。しかし、世界の偶然であるaleatoricは、データを増やしてもなくなりません。
 
-## 7. TS∞とTS1
+## 7. TS∞とTS1: Ensembleの意見を未来へどう運ぶか
 
-ensembleで未来をsampleするとき、どのmodelを使うかにも二通りあります。
+Ensembleには、同じDynamicsを少しずつ違って学んだ複数のmodelがあります。未来を複数本予測するため、particle（未来の候補を一本ずつ運ぶ入れ物）を用意します。
 
-    TS∞: 一つの粒子は、未来の最後まで同じmodelを使う
-    TS1:  毎step、使うmodelを選び直す
+```text
+Particle 1: 未来候補その1
+Particle 2: 未来候補その2
+Particle 3: 未来候補その3
+```
 
-TS∞は「このworld dynamicsの仮説が正しい」と一つを信じて未来を進める方法です。TS1は毎stepで仮説を混ぜます。
+TS∞とTS1は、各particleがどのEnsemble memberを使うかのルールです。
 
-どちらが常に正しいわけではありません。どの不確実性を未来へ運びたいか、という世界モデル側の仮定です。
+### TS∞: 一つの世界の仮説を最後まで保つ
+
+TS∞では、particleごとに最初に一つmemberを選び、horizonの最後まで固定します。
+
+```text
+Particle 1:
+t=1: Model 0で予測
+t=2: Model 0で予測
+t=3: Model 0で予測
+
+Particle 2:
+t=1: Model 3で予測
+t=2: Model 3で予測
+t=3: Model 3で予測
+```
+
+これは「本当の物理法則は一つだが、どのmemberが最も正しいか分からない」と考える方法です。一つのparticleの中では、世界の動き方についての仮説が一貫します。`∞`は、選んだmemberを将来の最後まで使い続ける意味です。
+
+### TS1: 毎stepでEnsembleの意見を選び直す
+
+TS1では、particleごとに毎step memberをsampleし直します。
+
+```text
+Particle 1:
+t=1: Model 0で予測
+t=2: Model 3で予測
+t=3: Model 1で予測
+```
+
+`1`は、member選択を1stepごとに行う意味です。modelごとの不確実さを毎stepで混ぜるため、未来の広がりを素早く取り込めます。
+
+ただし、同じparticleの中で「t=1ではModel 0の物理、t=2ではModel 3の物理」と切り替わるため、一つの一貫したworld hypothesisには存在しないtrajectoryを作る可能性があります。
+
+### どちらを使うべきか
+
+```text
+TS∞: 本当のDynamicsの候補を一つ選んだ世界を、最後まで見る
+TS1:  各stepの予測にEnsembleのばらつきを混ぜる
+```
+
+どちらが常に正しいわけではありません。TS∞は一貫した仮説を保ちますが、悪いmemberを選んだparticleも最後までそのmemberに従います。TS1は不確実さを早く広げられますが、現実には起きない混ざったDynamicsを作る可能性があります。
+
+したがってこれは実装上の細部ではなく、**不確実な世界を長い未来へどう運ぶかという世界モデル側の仮定**です。
 
 ## 8. Q&A: 未来は一意に定まっているのか
 
