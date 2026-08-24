@@ -2,6 +2,17 @@
 
 このREADMEは日本語で実験の目的・構造・確認結果を読む入口です。英語の技術原文（全数式、Tensor shape、実行条件、出典）は [README_TECHNICAL_EN.md](README_TECHNICAL_EN.md) に保存しています。UNDERSTANDING.mdを先に読んでから戻ると、実験記録を追いやすくなります。
 
+## まず読む順番
+
+1. **Purpose / Problem**: 前の方法の何が足りなかったかを読む。
+2. **Core Idea / Data Flow**: 入力から出力までの一番短い流れを読む。
+3. **Architecture and Training**: どの部品を足し、何を学習させるかを読む。
+4. **Evaluation / Limitations**: 何が確認でき、何が未証明かを読む。
+
+> Architectureの専門用語が分からないときは、先にこのフォルダのUNDERSTANDING.mdを読んでください。このREADMEでは「実際にこの実験でどの構成を使ったか」を確認します。
+
+
+
 ## Purpose / Problem
 
 未来を予測できても、候補action列のどれを実行するかは別問題です。
