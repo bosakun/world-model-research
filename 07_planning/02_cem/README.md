@@ -21,6 +21,21 @@ Random Shootingは良い候補を見つけても、その周辺を次に重点�
 
 高得点のelite action列の平均と分散から、次のsampling分布を更新します。
 
+## Architectureを一行ずつ読む
+
+    action分布 -> candidate sample -> world modelで採点
+    -> 上位eliteを選ぶ -> eliteの平均・分散で分布更新
+    -> 更新分布からもう一度sample
+
+1. 最初は広い分布からaction列を作ります。
+2. score上位のeliteだけを残します。
+3. eliteの近くを次に多く試せるよう、分布を更新します。
+4. 数回後、最良列の先頭actionだけを実行します。
+
+### 結果をどう読むか
+
+candidate数だけでなく、iteration数、elite数、分散の縮み方を見ます。分散が早く縮みすぎると、良い別候補を探す前に探索が止まります。
+
 ## Architecture and Training
 
 sample -> elite選択 -> 分布更新を数回繰り返し、最後に最良列の先頭actionを実行します。

@@ -21,6 +21,18 @@
 
 画像特徴を複数slotへattentionで集め、slotごとに物体らしい表現を作ります。
 
+## Architectureを一行ずつ読む
+
+    画像 -> encoder features
+    features <-> 複数slotのattention競争
+    -> slot集合 -> decoder reconstruction
+
+slotは物体の名前ではなく、特徴を集める箱です。複数slotが同じ特徴を担当しないよう競争しながら情報を集めます。
+
+### 結果をどう読むか
+
+再構成が良くてもslotが人間の期待する物体とは限りません。slot mask、背景への偏り、時刻ごとのslot入れ替わりを見ます。
+
 ## Architecture and Training
 
 iterative attention、slot competition、decoder reconstructionを学習します。

@@ -21,6 +21,18 @@ slotがあっても、物体どうしの影響を含む未来を予測する必�
 
 複数時刻のslot列へcausal Transformerを使い、次のobject slot集合を出します。
 
+## Architectureを一行ずつ読む
+
+    各画像 -> slot集合
+    過去slot列 + 時間位置 -> causal Transformer
+    -> future slot集合 -> decoderまたはslot targetと比較
+
+Transformerは過去slot間と時間方向の関係を見ます。causalなので未来時刻のslotは見ません。
+
+### 結果をどう読むか
+
+短期誤差だけでなく、長期rolloutで同じ物体のidentityが保たれるかを見ます。
+
 ## Architecture and Training
 
 slot tokenization、positional information、causal attention、slot rolloutを扱います。

@@ -21,9 +21,27 @@
 
 ランダムなaction列を多数sampleし、world model内のreward/valueで採点して最大の列を選びます。
 
+## Architectureを一行ずつ読む
+
+```text
+現在state
+    ↓
+長さHのaction列をN本ランダムに作る
+    ↓ world model rollout
+各action列の未来reward/valueを足してscoreにする
+    ↓
+最大scoreの列の先頭actionだけ実行する
+```
+
+`N`は候補数、`H`は何step先まで考えるかです。例えば100本の5step列を作り、100通りの5step未来をmodelの中で試します。実際の環境へ送るのは最良列の最初の一歩だけです。
+
 ## Architecture and Training
 
 candidate数、planning horizon、discount、risk penaltyを記録し、最良列の最初のactionだけを実行します。
+
+### 結果をどう読むか
+
+候補数を増やせば良い列を引きやすくなりますが、計算量も増えます。model内のscoreが高いだけで成功とは言えません。本物の環境でのrewardやsuccess rateと比べます。
 
 実行コマンド、random seed、dataset version、parameter数、checkpoint形式、詳細なloss式、Tensor shape、smoke-test数値は [README_TECHNICAL_EN.md](README_TECHNICAL_EN.md) にそのまま残しています。対応する実装は、このフォルダの model、dataset、losses、train、evaluate、tests です。
 

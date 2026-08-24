@@ -21,6 +21,19 @@
 
 vision、proprioception、touchなどを各encoderで表現し、欠損maskも含めてlatentへ統合します。
 
+## Architectureを一行ずつ読む
+
+    vision -> vision encoder
+    touch / proprioception -> 各encoder
+    + missing-modality mask
+    -> fusion -> shared latent -> prediction heads
+
+各感覚は別々に読んでから統合します。maskは「値が0」ではなく「sensorがない」と伝えるための情報です。
+
+### 結果をどう読むか
+
+全sensorがある場合だけでなく、cameraやtouchを落とした場合も評価します。特定sensorだけへの依存を見つけます。
+
 ## Architecture and Training
 
 modality encoder、fusion、missing-modality mask、prediction headを学習・評価します。

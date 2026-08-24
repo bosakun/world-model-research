@@ -21,6 +21,18 @@
 
 object slotごとのstateと、object pairのrelationから次の各object stateを予測します。
 
+## Architectureを一行ずつ読む
+
+    画像 -> object encoder -> 複数object state
+    object pair -> relation model
+    object state + relations -> 次の各object state
+
+一つのlatentへ混ぜず、物体らしいstateを複数残します。relation modelが「どの物体がどの物体へ影響するか」を担当します。
+
+### 結果をどう読むか
+
+全体画像の再現だけでなく、各slotが同じ物体を追えているか、物体単位のrolloutが崩れないかを見ます。
+
 ## Architecture and Training
 
 contrastive object representation、relation dynamics、object-level rolloutを扱います。

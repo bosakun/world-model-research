@@ -21,6 +21,19 @@
 
 前後のvisual stateからlatent actionを推論し、前stateとlatent actionで後stateを予測します。
 
+## Architectureを一行ずつ読む
+
+    before state + after state -> action encoder
+    -> latent action
+    before state + latent action -> dynamics
+    -> predicted after state
+
+latent actionは、動画の前後差を説明する内部変数です。人間が付けたaction名ではありません。
+
+### 結果をどう読むか
+
+latent actionの可視化、camera移動との混同、介入したときの予測を見ます。前後を復元できても原因を正しく分けた証拠にはなりません。
+
 ## Architecture and Training
 
 action encoder、latent dynamics、reconstruction/consistency lossを扱います。

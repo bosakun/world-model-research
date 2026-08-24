@@ -21,6 +21,19 @@
 
 latent dynamicsで未来latentを作り、reward/value headでscoreを出します。
 
+## Architectureを一行ずつ読む
+
+    観測 -> encoder -> latent state
+    latent + action列 -> latent dynamics rollout
+    future latent -> reward/value head -> score
+    -> 良いactionを選ぶ
+
+画像を毎step復元せず、controlに必要な情報だけをlatent内で使います。速くできる可能性がありますが、必要情報がlatentから消えていれば計画は失敗します。
+
+### 結果をどう読むか
+
+画像がきれいかではなく、reward/value精度とplanning successを読みます。decoderを外して速くなっても、実環境のrewardが下がれば採用できません。
+
 ## Architecture and Training
 
 decoder-free objective、latent rollout、planning scoreを学習・評価します。

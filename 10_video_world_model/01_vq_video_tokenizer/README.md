@@ -21,6 +21,18 @@
 
 画像をcodebookのtoken ID列へ圧縮し、Dynamicsは次のtoken列を予測します。
 
+## Architectureを一行ずつ読む
+
+    image -> encoder features
+    -> nearest codebook vector -> token IDs
+    token IDs -> decoder -> reconstruction
+
+codebookは視覚の単語帳です。encoderは画像の各部分を最も近い単語番号へ変え、Dynamicsはpixelではなく番号列を予測します。
+
+### 結果をどう読むか
+
+pixel再構成だけでなく、codebookが少数tokenに偏っていないか、Agentなど重要物体がtoken化後も残るかを見ます。
+
 ## Architecture and Training
 
 encoder、vector quantization、decoder、codebook/reconstruction lossを学習します。

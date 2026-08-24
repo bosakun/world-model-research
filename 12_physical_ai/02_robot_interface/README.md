@@ -21,6 +21,21 @@
 
 action requestをvalidation、rate/position/force limit、emergency stopを通して実行します。
 
+## Architectureを一行ずつ読む
+
+    model action request
+    -> schema / unit validation
+    -> speed, position, force limits
+    -> emergency stop確認
+    -> robot execution
+    -> observation, action, resultをlog
+
+学習modelの出力は提案であり、robot commandではありません。安全guardを通って初めて実行可能なcommandになります。
+
+### 結果をどう読むか
+
+成功回数だけでなく、guardが拒否したaction、遅延、ログ完全性、非常停止の動作を確認します。
+
 ## Architecture and Training
 
 command schema、safety guard、observation/action/result log、simulator fallbackを実装します。

@@ -21,6 +21,19 @@
 
 現在のcontext representationとactionから、未来のtarget representationを予測します。
 
+## Architectureを一行ずつ読む
+
+    context observation -> context encoder
+    future observation -> target encoder
+    context representation + action -> predictor
+    -> target representationと比較
+
+targetは未来画像のpixelではなく未来の表現です。predictorはactionの結果として重要な特徴を当てます。
+
+### 結果をどう読むか
+
+representation lossだけで判断せず、downstream controlや安全taskで必要情報が残るかを見ます。
+
 ## Architecture and Training
 
 context/target encoder、predictor、stop-gradient target、action conditioningを扱います。

@@ -21,15 +21,46 @@
 
 現在から複数step想像したlatentを、将来画像から推論したlatentへ近づけます。
 
+## Architectureを一行ずつ読む
+
+```text
+現在の画像列 + action列
+    ↓ Encoder / posterior
+各時刻の「正解に近いlatent」を作る
+    ↓
+時刻tのlatentからactionをk回使う
+    ↓ Dynamics rollout
+k step先の予測latentを作る
+    ↓
+同じ時刻t+kのposterior latentと比較する
+```
+
+1. 学習データには画像列とaction列があります。画像からRSSMのposteriorを作ると、「実際にその時刻で観測した世界」に近いlatentを得られます。
+2. 次に、時刻`t`のlatentからfuture imageを見ずにactionを`k`回通します。これは本番のimaginationと同じ、未来画像なしのrolloutです。
+3. その結果できた予測latentと、実際の時刻`t+k`の画像を見て作ったposterior latentを比べます。
+4. 1step先だけでなく2step先、3step先も比べるので、Dynamics Modelは長い未来で壊れにくい方向へ学びます。
+
+例えば「rightを3回」というaction列なら、`t`から3回想像したlatentを、3step後の正解画像から得たlatentへ近づけます。未来画像は答え合わせだけであり、想像の入力には使いません。
+
 ## Architecture and Training
 
 1step lossに加えk-stepのKL/latent consistency lossを使います。未来画像は学習時の答え合わせだけで、rolloutの入力には使いません。
+
+### lossをどう読むか
+
+- 1step loss: 次の一歩を当てる能力を学ばせる。
+- k-step overshooting loss: 数step先まで想像したlatentが正しい方向へ進むよう学ばせる。
+- KL: priorが、観測を見たposteriorに近い未来を予測できるようにする。
+
+overshooting lossを小さくしても、画像の細部やrewardまで正しくなったとは限りません。評価では、1stepのlossだけでなくhorizonごとのrollout errorを見る必要があります。
 
 実行コマンド、random seed、dataset version、parameter数、checkpoint形式、詳細なloss式、Tensor shape、smoke-test数値は [README_TECHNICAL_EN.md](README_TECHNICAL_EN.md) にそのまま残しています。対応する実装は、このフォルダの model、dataset、losses、train、evaluate、tests です。
 
 ## Evaluation
 
 一つの見栄えのよい例だけで判断せず、forward pass、rollout、loss、task固有の指標、failure caseを確認します。outputsフォルダには学習・評価で作った図と数値を保存しています。
+
+この実験では特に、1stepは良いのに5stepや10stepで急に悪くならないかを見ます。長期誤差が改善して初めて、overshootingが役立った可能性があります。
 
 ## Limitations
 

@@ -21,6 +21,18 @@
 
 3D voxelまたはquery座標ごとにoccupiedかemptyかを予測します。
 
+## Architectureを一行ずつ読む
+
+    camera observation -> 3D features
+    3D voxel / query座標 -> occupied確率
+    action後 -> future occupancyを予測
+
+各空間位置で「物があるか」を出します。画像の見た目ではなく、通行可能な空間を直接扱う表現です。
+
+### 結果をどう読むか
+
+見える領域と遮蔽領域を分けて精度を見ます。3D gridのmemory・latencyも実用上の重要な評価です。
+
 ## Architecture and Training
 
 camera observationを3D representationへ統合し、future occupancyを予測・評価します。

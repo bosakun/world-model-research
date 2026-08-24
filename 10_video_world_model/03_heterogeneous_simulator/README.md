@@ -21,6 +21,19 @@ simulatorごとにobservation、action、座標系、単位が異なり、数値
 
 各sourceのschemaを型付きadapterで共通Dynamics interfaceへ変換します。
 
+## Architectureを一行ずつ読む
+
+    simulator固有record
+    -> schema adapter（field・単位・maskを確認）
+    -> 共通observation/action
+    -> shared dynamics
+
+adapterは単なるshape変換ではありません。「この数字が何を意味するか」も保存する境界です。
+
+### 結果をどう読むか
+
+source別のunit、missing field、adapter testを読みます。数字が通ることは、意味が揃った証拠ではありません。
+
 ## Architecture and Training
 
 observation/action schema、mask、normalization、dataset provenanceを記録します。

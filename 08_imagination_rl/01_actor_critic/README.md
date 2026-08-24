@@ -21,6 +21,19 @@
 
 Actorがlatentからactionを出し、world modelが次latentとrewardを想像し、Criticが将来価値を評価します。
 
+## Architectureを一行ずつ読む
+
+    実データ -> world model
+    latent -> Actor -> action
+    latent + action -> imagined next latent
+    imagined reward + Critic value -> Actor/Criticを更新
+
+Actorはactionを出す役、Criticは将来の良さを採点する役です。本物の環境でなくmodel内部のtrajectoryを使って二つを学びます。
+
+### 結果をどう読むか
+
+imagined returnだけで判断しません。実環境returnとの差が大きければ、Actorがworld modelの誤りを利用している可能性があります。
+
 ## Architecture and Training
 
 imagined trajectoryでActor/Criticを更新し、world modelは実環境データで別途更新します。

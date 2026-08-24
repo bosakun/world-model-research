@@ -21,6 +21,19 @@
 
 planning後に最初のactionだけ実行し、本物の次観測から再びplanningします。
 
+## Architectureを一行ずつ読む
+
+    現在観測 -> H stepの計画
+    -> 最初のactionだけ実行
+    -> 本物の次観測を受け取る
+    -> 前の残り計画を捨てて再計画
+
+MPCは新しいmodelではなく、world modelを使うcontrol loopです。毎stepで観測を取り直すため、以前の予測誤差を修正できます。
+
+### 結果をどう読むか
+
+open-loop（最初の計画を最後まで実行）と比べ、予測誤差があるときほどMPCが改善するかを見ます。successだけでなく、毎stepのplanning時間も確認します。
+
 ## Architecture and Training
 
 random shootingまたはCEMをreceding horizonで繰り返し、open-loopと比較します。
